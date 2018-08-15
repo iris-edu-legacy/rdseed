@@ -233,7 +233,6 @@ struct type74 *t_74;
 	if (!chk_network(type10.version >= 2.3 ? t_74->network_code : ""))
 		return 0;
  
-
 	if (!chk_location(t_74->location))
 		return 0;
  

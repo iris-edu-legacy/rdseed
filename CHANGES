@@ -896,8 +896,8 @@ version 5.3
 		number of samples limited to maximum as defined in the wfdisc table (99999999)
 			issues a warning to the user that it will break at this number
 		 
-	Fix needed for seed volume output, option '5' for large seed volumes requiring a larger logical
-	records size.
+	Fix needed for seed volume output, option '5'.  When large seed volumes are written the
+	logical record needed adjustment.
 
 	Fix needed for seed volume output, option '5', when using a dataless seed volume and a mini 
 	seed volume. If the resulting seed volume is so large that the logical record needed to be
@@ -907,4 +907,16 @@ version 5.3
         fixed bug in ieeefloat decoding.
 
         took out extraneous debug message
-	
+
+version 5.3.1
+
+	Moved AH output back from doubles to floats as most AH processing programs do not support
+ 	doubles.
+
+	Memory leak when processing with summary files.
+
+	Added in Event Directory processing when a summary file is selected via the command line. Made consistent 
+	with the interactive mode. 
+
+	Added the network, station, channel and location to the error message if there was a bad steim 1, 2
+		 decompression problem.	

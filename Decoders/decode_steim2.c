@@ -40,7 +40,7 @@
 /* #define LRECL 4096		*/ /* # bytes in block */
 #define ELEMENTS_FRAME 16	/* # elements per data frame */
 
-void decode_steim2 (data_ptr, nsamples, index)
+int decode_steim2 (data_ptr, nsamples, index)
 char *data_ptr;
 int nsamples;
 int index;
@@ -62,6 +62,7 @@ int index;
 	int compression_flag[ELEMENTS_FRAME];	/* compression flags */
 	int num_frames;			/* number of frames in block */
 	int counter;			/* counter */
+	int steim_error;
 
 	FILE *fp;
 	
@@ -70,6 +71,8 @@ int index;
 /*                 +=======================================+                 */
 /*=================| get first, last values, # of frames   |=================*/
 /*                 +=======================================+                 */
+
+	steim_error = 0;
 
 	/* find last value from current seismogram DOESN'T WORK YET */
 /*	if (index != 0) last_value = (double) *(seismic_data_ptr - 1);
@@ -323,6 +326,8 @@ index+nsamples);
 
 		for (i=0;i<(nsamples-counter); i++) *seismic_data_ptr++ = 0.0; 
 
+		steim_error = 1;
+
 		nsamples = counter;
 	}
 /*
@@ -333,6 +338,8 @@ for (; sav_ptr < seismic_data_ptr; sav_ptr++)
                 
 fclose(fp);
 */
+
+	return steim_error;
 
 }										/* subprocedure */
 

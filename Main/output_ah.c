@@ -75,6 +75,8 @@ int offset;
 	struct time data_hdr_endtime;
 	struct type48 *type_48;
 
+	float *buffer;
+
 	char wrkstr[512];
         int y, ddd;
 
@@ -85,6 +87,14 @@ int offset;
 	getcwd(orig_dir, MAXPATHLEN);
 
 	chdir(output_dir);
+
+	if ((buffer = malloc(data_hdr->nsamples * sizeof(float))) == NULL)
+	{
+		fprintf(stderr,"Unable to continue.  No memory!\n");
+		chdir(orig_dir);
+		return;
+	}
+	
 
 	if (EventDirFlag)
 	{
@@ -116,6 +126,7 @@ int offset;
 		{
 			fprintf(stderr,"Output Data Contains No Samples\n");
 			chdir(orig_dir);
+			free(buffer);
 			return;
 		}		
 
@@ -123,7 +134,7 @@ int offset;
 		{
 			fprintf(stderr, "\tERROR - Unexpected End of Multiplexed Channel List\n");
 			chdir(orig_dir); 
-
+			free(buffer);
 			return;
 		}
 
@@ -204,11 +215,9 @@ int offset;
 		{
 			if (reverse_flag & 1)
 			{
-			fprintf (stderr, "Warning... Azimuth/Dip Reversal found %s.%s, Data inversion was not selected\n           Header Scale Negated, but Response File will not be modified\n\n", current_station->station, channel);
+				fprintf (stderr, "Warning... Azimuth/Dip Reversal found %s.%s, Data inversion was not selected\n           Header Scale Negated, but Response File will not be modified\n\n", current_station->station, channel);
+				hed.station.DS = -hed.station.DS;
 
-			
-
-			hed.station.DS = -hed.station.DS;
 			}
 
 			reverse_flag &= 2;
@@ -283,7 +292,7 @@ int offset;
 		hed.record.abstime.mn= (short) data_hdr->time.minute;
 		hed.record.abstime.sec= (float) data_hdr->time.second+(float)data_hdr->time.fracsec*0.0001;
 
-		hed.record.type=DOUBLE;
+		hed.record.type=FLOAT;
 
 		if(reverse_flag) 			
 			strncat(hed.record.rcomment, 
@@ -519,7 +528,7 @@ int offset;
 			perror("output_ah()");
 
 			chdir(orig_dir); 
-
+			free(buffer);
 			return;	
 		}
 
@@ -561,6 +570,21 @@ int offset;
 			ier = maxamp (&hed, &seismic_data[offset+j]);
 
 			/* write ah header and data */
+			/* only support float for now */
+
+			for (i=0; i<data_hdr->nsamples; i++)
+			{
+
+				buffer[i] = (float) seismic_data[offset+i+j];
+
+				if (buffer[i] != seismic_data[offset+i+j])
+				{
+					sprintf(wrkstr, "Detected loss of value in conversion from double to float at sample #%d", i);
+
+                                	rdseed_alert_msg_out(wrkstr);
+					fprintf(stderr, "%s\n", wrkstr);
+				}
+			}
 
 			if(xdr_puthead(&hed, &xdr_out) != 1) 
 			{
@@ -570,7 +594,8 @@ int offset;
 
 				exit(-3);
 			}			
-			if(xdr_putdata(&hed, (char *)&seismic_data[offset+j], &xdr_out) < 0)
+
+			if(xdr_putdata(&hed, (char *)buffer, &xdr_out) < 0)
 			{
 				fprintf(stderr,"Error writing data in rdseed; output_ah\n");
 				perror("xdr_putdata");
@@ -596,6 +621,8 @@ int offset;
 	for (current_channel=current_channel->next; current_channel != NULL; current_channel=current_channel->next)
 		if (strcmp(channel, current_channel->channel) == 0) break;
 #endif
+
+	free(buffer);
 
 	return;
 

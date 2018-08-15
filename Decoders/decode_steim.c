@@ -45,7 +45,7 @@ static int samp_cnter;
 
 extern struct stn_list *stn_listhead;
 
-void decode_steim (data_ptr, nsamples, index)
+int decode_steim (data_ptr, nsamples, index)
 char *data_ptr;
 int nsamples;
 int index;
@@ -69,6 +69,8 @@ int index;
 	int num_frames;			/* number of frames in block */
 	int counter;			/* counter */
 
+	int steim_error;
+
 	FILE *fp;
 	double *sav_ptr;
 
@@ -79,6 +81,8 @@ int index;
 /*                 +=======================================+                 */
 /*=================| get first, last values, # of frames   |=================*/
 /*                 +=======================================+                 */
+
+	steim_error = 0;
 
 	/* find last value from current seismogram DOESN'T WORK YET */
 	if (index != 0) last_value = (double) *(seismic_data_ptr - 1);
@@ -282,6 +286,8 @@ sample_cnter++;
 index+nsamples);
 		fprintf(stderr, "LRECL = %d,Expected %d, found %d samples... Lost values will be Padded with Zeros\n", LRECL,nsamples, counter);
 
+		steim_error = 1;
+
 		for (i=0;i<(nsamples-counter); i++) *seismic_data_ptr++ = 0.0; 
 	}
 /*
@@ -299,5 +305,7 @@ index+nsamples);
 
 
 */
+	return steim_error;
+
 }				/* subprocedure */
 

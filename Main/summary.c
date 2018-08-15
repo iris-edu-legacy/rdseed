@@ -147,6 +147,7 @@ char *fname;
 
 		if (strstr(token, "STATION")) 
                 {
+
 			stn_ptr = (struct stn_tspan *)
 					malloc(sizeof(struct stn_tspan));
 
@@ -712,6 +713,11 @@ void set_event(struct time *blk_start, struct time *blk_end)
 		}
 
 		stn_ptr = stn_ptr->next;
+
+		fuse(&bitty_pieces, nnnn);
+		fuse(&pieces, nnn);
+		fuse(&parts, nn);
+		fuse(&c_ptr, n);
 
 	}
 

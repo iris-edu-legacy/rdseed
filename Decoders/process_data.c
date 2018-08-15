@@ -80,8 +80,6 @@
 
 */
 
-/* #include <sunmath.h> */
-
 #include "rdseed.h"
 
 #define TIME_PRECISION 10000		/* number of divisions in a */
@@ -132,6 +130,7 @@ char scan_for_blk_1001();
 void process_data (int fsdh_swapped)
 
 {
+
 	char now_quality;
 
 	int i;									
@@ -148,6 +147,7 @@ void process_data (int fsdh_swapped)
 	int continuous;		/* stn,chnl,time cts flag */
 	double duration;			/* time duration of record */
 	struct time newtime;		/* new ending time of s'gm */
+	struct time blkEndtime;		/* new ending time of s'gm */
 	int sample_rate_multiplier;	/* temp used in calc smpl rt */
 	short int temp_2byte;		/* temp for byte-swapping */
 	int temp_4byte;			/* temp for byte-swapping */
@@ -164,6 +164,8 @@ void process_data (int fsdh_swapped)
 	double this_sample_rate;		/* temp used to store smpl rt */
 
 	struct type30 *this_type30;	/* index into SEED tables */
+
+	int steim_error = 0;
 
 	chn_log = FALSE;
 
@@ -638,9 +640,9 @@ printf("input_data=%d,%d:%d:%d.%d\n", input_data_hdr->time.day, input_data_hdr->
         	duration = ((double)this_nsamples*TIME_PRECISION)/this_sample_rate;
     	else duration = 0;
  
-    	newtime = timeadd_double(this_time, duration);
+    	blkEndtime = timeadd_double(this_time, duration);
 
-// printf("block end time =%d,%d,%d:%d:%d.%d\n", newtime.year, newtime.day, newtime.hour, newtime.minute, newtime.second, newtime.fracsec);
+// printf("block end time =%d,%d,%d:%d:%d.%d\n", blkEndtime.year, blkEndtime.day, blkEndtime.hour, blkEndtime.minute, blkEndtime.second, blkEndtime.fracsec);
 
     	/* if block time span is not overlapping a selected span,
      	 *  forget this block
@@ -653,21 +655,11 @@ printf("input_data=%d,%d:%d:%d.%d\n", input_data_hdr->time.day, input_data_hdr->
 	if (!read_summary_flag)
 	{
 		/* else use the normal entry (from keyboard) */
-    		if (!chk_time (this_time, newtime))
+    		if (!chk_time (this_time, blkEndtime))
 		{
         		return;
 		}
 	}
-
-#if 0
-
-	else
-	{
-		// if (!chk_summary(this_time, newtime))
-		//	return;
-	}
-#endif
-
 
 /*                 +=======================================+                 */
 /*=================| accumulate various descriptive info   |=================*/
@@ -1008,6 +1000,8 @@ printf("\tthis time=%d,%d:%d:%d.%d\n***************\n", this_time.day, this_time
 
 		}
 
+		steim_error = 0;
+
 		/* point to first sample of this data block */
 		input_data_ptr = lrecord_ptr + input_data_hdr->bod;
 
@@ -1025,9 +1019,9 @@ printf("\tthis time=%d,%d:%d:%d.%d\n***************\n", this_time.day, this_time
 		else if (strstr(decode, "DWWSS"))
 			decode_dwwssn(input_data_ptr, this_nsamples, next_index);
 		else if (strstr(decode, "STEIM2")) 
-			decode_steim2(input_data_ptr, this_nsamples, next_index);
+			steim_error = decode_steim2(input_data_ptr, this_nsamples, next_index);
 		else if (strstr(decode, "STEIM")) /* MUST come after STEIM2 */
-			decode_steim(input_data_ptr, this_nsamples, next_index);
+			steim_error = decode_steim(input_data_ptr, this_nsamples, next_index);
 		else if (strstr(decode, "SRO G"))
 			decode_sro(input_data_ptr, this_nsamples, next_index);
 		else if (strstr(decode, "ECHY"))
@@ -1051,6 +1045,26 @@ printf("\tthis time=%d,%d:%d:%d.%d\n***************\n", this_time.day, this_time
 		else
 			decode_ddl(input_data_ptr, this_nsamples, next_index, this_type30);
 
+		if (steim_error)
+		{
+			fprintf(stderr, "Steim error detected for NSLC=%s,%s,%s,%s\n",
+						network_code, this_station, this_location, this_channel);
+
+			fprintf(stderr, "\tat: start time=%d,%d,%d:%d:%d.%d\n", 
+					this_time.year, 
+					this_time.day, 		
+					this_time.hour, 
+					this_time.minute, 	
+					this_time.second, this_time.fracsec);
+
+			fprintf(stderr, "\t\tblock end time =%d,%d,%d:%d:%d.%d\n", 
+					blkEndtime.year, 
+					blkEndtime.day, 
+					blkEndtime.hour, 
+					blkEndtime.minute, 	
+					blkEndtime.second, 
+					blkEndtime.fracsec);
+		}
 	}
 
 /*                 +=======================================+                 */
