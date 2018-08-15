@@ -44,11 +44,12 @@
 
 struct type58 *find_type_58_stage_0();
 
-static int siteid;
+static int siteid = 0;
 char *get_event_dir_name();
 char *get_net();
 struct type33 *find_type_33();
 char *get_src_name();
+int scan_affiliation(char *, char *, char *);
 
 extern int EventDirFlag;
 extern struct type48 *find_type_48_stage(int, struct response *);
@@ -62,17 +63,24 @@ int offset;
 	char 	outfile_name[80], channel[12];	/* output file name */
 	int 	i, j, k;	/* counters */
 	char 	character[12];	/* for character transfer */
-	int 	ascii;		/* switch for ASCII output */
-	int 	binary;		/* switch for binary output */
 	int 	reverse_flag;	/* Data reversal flag */
 	time_t	time_sec;
 	double  dip;		/* temp holding for these variables */
 	double  azimuth;	/* temp holding for these variables */
 	double  calib, calper;	/* wfdisc calibration parms */
-	struct	time	stime;	/* start time of channel info */
+	struct	time	stn_stime;	/* start time of station info */
+	struct	time	stn_etime;	/* end time of stninfo */
+	char 	hold_time[50];	/*  */
+
+	struct	time	chn_stime;	/* start time of channel info */
+	struct	time	chn_etime;	/* end time of channel info */
+
 	struct	tm	*ltime;
 	char	lddate[20];	/* current date and time */
+
 	int		wfid;	/* wfdisc id variable */
+	int		cfid;	/* sitechan id variable */
+
 	struct	stat statbuf;	/* file status buffer */
 	char Wfdisc_buf[288];
 	struct type48 *type_48;
@@ -83,10 +91,6 @@ int offset;
 
 	char event_dir[MAXPATHLEN];
 	char orig_dir[MAXPATHLEN];
-
-	/* select ASCII or binary output (binary chosen here) */
-	ascii = FALSE;
-	binary = !ascii;
 
 	i_seismic_data = (int *) seismic_data;	/* Copy buffer pointer */
 
@@ -100,6 +104,7 @@ int offset;
 
 	time(&time_sec);
 	ltime = localtime(&time_sec);
+
 	strftime(lddate, 18, "%D %T", ltime);
 
 	getcwd(orig_dir, MAXPATHLEN);
@@ -246,7 +251,7 @@ int offset;
 			if (reverse_flag & 1)
 				fprintf (stderr, "Warning... Azimuth/Dip Reversal found %s.%s, Data inversion was not selected\n",
 					current_station->station, channel);
-		reverse_flag &= 2;
+			reverse_flag &= 2;
 		}
 
 		if (check_reverse & 2)
@@ -260,7 +265,7 @@ int offset;
 			if (reverse_flag & 2)
 				fprintf (stderr, "Warning... Gain Reversal found %s.%s, Data inversion was not selected\n",
 					current_station->station, channel);
-		reverse_flag &= 1;
+			reverse_flag &= 1;
 		}
 
 		if (reverse_flag == 3)
@@ -309,9 +314,6 @@ int offset;
 			return;
 		}
 			
-	 	if (binary)
-		{
-	
 			/* WFDISC information */
 
 		if (access("rdseed.wfdisc", R_OK)) wfid = 1;
@@ -336,48 +338,9 @@ int offset;
 		strcpy(channel_loc, channel);
 		strncat(channel_loc, data_hdr->location, 2);
 
-  		sprintf(&Wfdisc_buf[0], "%-6s ", data_hdr->station);
-
-		// space is important - each subsequent field overwrites the previous null byte
-  		sprintf(&Wfdisc_buf[7], "%-8s ", channel_loc);
-
- 		sprintf(&Wfdisc_buf[16], "%17.5f ", (double)time_sec + ((double)data_hdr->time.fracsec)/10000.0);
-
-  		sprintf(&Wfdisc_buf[34], "%8d ", wfid);
-  		sprintf(&Wfdisc_buf[43], "%8d ", -1);
-		sprintf(&Wfdisc_buf[52], "%8d ", (data_hdr->time.year * 1000) + data_hdr->time.day);
- 		sprintf(&Wfdisc_buf[61], "%17.5f ",
-			((double)time_sec + ((double)data_hdr->time.fracsec)/10000.0) +
-		        ((double)(data_hdr->nsamples-1)/data_hdr->sample_rate));
-
-		sprintf(&Wfdisc_buf[79], "%8d ", data_hdr->nsamples);
- 		sprintf(&Wfdisc_buf[88], "%11.7f ", data_hdr->sample_rate);
- 		sprintf(&Wfdisc_buf[100], "%16.6f ", calib);
-  		sprintf(&Wfdisc_buf[117], "%16.6f ", calper);
-  		sprintf(&Wfdisc_buf[134], "%-6s ", "-");
-  		sprintf(&Wfdisc_buf[141], "%1s ", "o");
-
-		if (get_word_order() == 0)
-  			// intel 
-			sprintf(&Wfdisc_buf[143], "%-2s ", "i4");
-		else
-			sprintf(&Wfdisc_buf[143], "%-2s ", "s4");
-
-  		sprintf(&Wfdisc_buf[146], "%1s ", "-");
-
-		sprintf (outfile_name, ".                                                                 ");
-
-		strcpy(&Wfdisc_buf[148], outfile_name);
-
 		sprintf (outfile_name, "rdseed%08d.%c.w                    ",
 			wfid, 
 			input.type);
-
-		strcpy(&Wfdisc_buf[213], outfile_name );
-
-  		sprintf(&Wfdisc_buf[246], "%10d ", 0);
-  		sprintf(&Wfdisc_buf[257], "%8d ", -1);
-  		sprintf(&Wfdisc_buf[266], "%-17s\n", lddate);    
 
 		*(strchr(outfile_name,' ')) = 0;
 
@@ -394,11 +357,11 @@ int offset;
 			return;
 		}
 
-
 		/* describe the file being written */
 
 		printf ("Writing %s, %s, %5d samples (binary),",
 			data_hdr->station,channel,data_hdr->nsamples);
+
 		printf (" starting %04d,%03d %02d:%02d:%02d.%04d UT\n",
 			data_hdr->time.year,data_hdr->time.day,
 			data_hdr->time.hour,data_hdr->time.minute,
@@ -442,99 +405,44 @@ int offset;
 
 		fclose (outfile);
 
-		sprintf (outfile_name, "rdseed.wfdisc", css_filename);
+		timecvt(&stn_stime, current_station->start);
+		timecvt(&stn_etime, current_station->end);
 
-		if ((outfile = fopen (outfile_name, "a")) == NULL)
+		timecvt(&chn_stime, current_channel->start);
+		timecvt(&chn_etime, current_channel->end);
+
+		if ((outfile = fopen ("rdseed.sitechan", "r+")) == NULL)
 		{
-			fprintf (stderr,"\tWARNING (output_css):  ");
-			fprintf (stderr,"Output file %s is not available for writing.\n",outfile_name);
-			
-			perror("output_css()");
+			if ((outfile = fopen ("rdseed.sitechan", "w+")) == NULL)
+			{
+				fprintf (stderr,"\tWARNING (output_css):  ");
+				fprintf (stderr,"Output SITE file is not available for writing.\n");
+				fprintf (stderr, "\tExecution continuing.\n");
 
-			fprintf (stderr, "\tExecution continuing.\n");
+				perror("output_css()");
+
+				chdir(orig_dir);
+
+				return;
+			}
 		}
 
-		if (fwrite (Wfdisc_buf, strlen(Wfdisc_buf), 1, outfile) != 1)
-		{
-			fprintf (stderr, "WARNING (output_css):  ");
-			fprintf (stderr, "failed to properly write CSS WFDISC data to %s.\n", outfile_name);
+		cfid = determineChanId(outfile, data_hdr->station);
 
-			perror("output_css()");
+		if (fprintf(outfile, "%-6s %-8s %04d%03d %8d %8d n %9.4f %6.1f %6.1f %-50s %17s\n",
+					data_hdr->station,
+					channel_loc,
+					chn_stime.year, chn_stime.day,
+					cfid,
+					(chn_etime.year && chn_etime.day) == 0	? -1 : chn_etime.year * 1000 + chn_etime.day,
+					current_channel->local_depth/1000,
+					azimuth,
+					dip+90,
+					"-",
+					lddate) == -1)
 
-			fprintf (stderr, "\tExecution continuing.\n");
-		}
+//			if (fwrite (Wfdisc_buf, strlen(Wfdisc_buf), 1, outfile) != 1)
 
-		fclose (outfile);
-
-		timecvt(&stime, current_channel->start);
-
-		siteid++;
-		sprintf(&Wfdisc_buf[0], "%8d ",  siteid);
-  		sprintf(&Wfdisc_buf[0], "%-6s ", data_hdr->station);
-		sprintf(&Wfdisc_buf[7], " %04d%03d ", stime.year, stime.day);
- 		sprintf(&Wfdisc_buf[16], "%8d ", -1);
- 		sprintf(&Wfdisc_buf[25], "%9.4f ", current_channel->latitude);
-  		sprintf(&Wfdisc_buf[35], "%9.4f ", current_channel->longitude);
-  		sprintf(&Wfdisc_buf[45], "%9.4f ", current_channel->elevation/1000);
-   		sprintf(&Wfdisc_buf[55], "%-50.50s ", current_station->name);
- 		sprintf(&Wfdisc_buf[106], "%-4s ", "-");
-  		sprintf(&Wfdisc_buf[111], "%-6s ", "-");
- 		sprintf(&Wfdisc_buf[118], "%9.4f ", 0.0);
-  		sprintf(&Wfdisc_buf[128], "%9.4f ", 0.0);
-  		sprintf(&Wfdisc_buf[138], "%-17s\n", lddate);
-
-		sprintf (outfile_name, "rdseed.site", css_filename);
-		if ((outfile = fopen (outfile_name, "a")) == NULL)
-		{
-			fprintf (stderr,"\tWARNING (output_css):  ");
-			fprintf (stderr,"Output SITE file is not available for writing.\n");
-			fprintf (stderr, "\tExecution continuing.\n");
-
-			perror("output_css()");
-
-			chdir(orig_dir);
-
-			return;
-		}
-		
-
-		if (fwrite (Wfdisc_buf, strlen(Wfdisc_buf), 1, outfile) != 1)
-		{
-			fprintf (stderr, "WARNING (output_css):  ");
-			fprintf (stderr, "failed to properly write CSS SITE data to %s.\n", outfile_name);
-
-			perror("output_css()"); 
- 
-			fprintf (stderr, "\tExecution continuing.\n");
-		}
-		fclose (outfile);
-
-  		sprintf(&Wfdisc_buf[0], "%-6s ", data_hdr->station);
-		sprintf(&Wfdisc_buf[7], "%-8s ", channel);
-		sprintf(&Wfdisc_buf[16], " %04d%03d ", stime.year, stime.day);
- 		sprintf(&Wfdisc_buf[25], "%8d ", -1);
-  		sprintf(&Wfdisc_buf[34], "%8d ", -1);			/* off date */
-  		sprintf(&Wfdisc_buf[43], "%-4s ", "n");
-   		sprintf(&Wfdisc_buf[48], "%9.4f ", current_channel->local_depth);
- 		sprintf(&Wfdisc_buf[58], "%6.1f ", azimuth);
-  		sprintf(&Wfdisc_buf[65], "%6.1f ", dip+90.0);
- 		sprintf(&Wfdisc_buf[72], "%-50s ", "-");
-  		sprintf(&Wfdisc_buf[123], "%17s\n", lddate);
- 
-		sprintf (outfile_name, "rdseed.sitechan", css_filename);
-
-		if ((outfile = fopen (outfile_name, "a")) == NULL)
-		{
-			fprintf (stderr,"\tWARNING (output_css):  ");
-			fprintf (stderr,"Output SITE file is not available for writing.\n");
-
-			perror("output_css()"); 
- 
-			fprintf (stderr, "\tExecution continuing.\n");
-		}
-		
-
-		if (fwrite (Wfdisc_buf, strlen(Wfdisc_buf), 1, outfile) != 1)
 		{
 			fprintf (stderr, "WARNING (output_css):  ");
 			fprintf (stderr, "failed to properly write CSS SITECHAN data to %s.\n", outfile_name);
@@ -547,11 +455,111 @@ int offset;
 
 		fclose (outfile);
 
+		/* ********** */
+
+		if ((outfile = fopen ("rdseed.wfdisc", "a")) == NULL)
+		{
+			fprintf (stderr,"\tWARNING (output_css):  ");
+			fprintf (stderr,"Output file %s is not available for writing.\n",outfile_name);
+			
+			perror("output_css()");
+
+			fprintf (stderr, "\tExecution continuing.\n");
 		}
+
+		sprintf (outfile_name, "rdseed%08d.%c.w                    ",
+			wfid, 
+			input.type);
+
+		if (fprintf(outfile, "%-6s %-8s %17.5f %8d %8d %8d %17.5f %8d %11.7f %16.6g %16.6f %-6s o  %-2s - %-64s, %-32s %10d %8d %17s\n",
+  			data_hdr->station,
+			channel_loc,
+ 			(double)time_sec + ((double)data_hdr->time.fracsec)/10000.0,
+  			wfid, cfid,
+			(data_hdr->time.year * 1000) + data_hdr->time.day,
+			((double)time_sec + ((double)data_hdr->time.fracsec)/10000.0) + ((double)(data_hdr->nsamples-1)/data_hdr->sample_rate),
+			data_hdr->nsamples,
+ 			data_hdr->sample_rate,
+ 			calib,
+			calper,
+  			"-",
+			get_word_order() == 0 ?  // intel 
+				"i4" :
+				"s4",
+			".",
+			outfile_name,
+  			0, -1, lddate) == -1)
+
+// if (fwrite (Wfdisc_buf, strlen(Wfdisc_buf), 1, outfile) != 1)
+		{
+			fprintf (stderr, "WARNING (output_css):  ");
+			fprintf (stderr, "failed to properly write CSS WFDISC data to %s.\n", outfile_name);
+
+			perror("output_css()");
+
+			fprintf (stderr, "\tExecution continuing.\n");
+		}
+
+		fclose (outfile);
+
+
+		sprintf (outfile_name, "rdseed.site");
+
+		if ((outfile = fopen ("rdseed.site", "r+")) == NULL)
+		{
+			if ((outfile = fopen ("rdseed.site", "w+")) == NULL)
+			{
+				fprintf (stderr,"\tWARNING (output_css):  ");
+				fprintf (stderr,"Output SITE file is not available for writing.\n");
+				fprintf (stderr, "\tExecution continuing.\n");
+
+				perror("output_css()");
+
+				chdir(orig_dir);
+
+				return;
+			}
+		}
+
+
+		// scan file for exiting station info
+		if (!chkForStn(outfile, data_hdr->station))
+		{
+
+int n;
+			// not there, put in
+			if ((n = fprintf(outfile, "%-6s %04d%03d %8d %9.4f %9.4f %9.4f %-50.50s %-4s %-6s %9.4f %9.4f %17s\n",
+				data_hdr->station,
+				stn_stime.year, stn_stime.day,
+				(stn_etime.year && stn_etime.day) == 0	? -1 : stn_etime.year * 1000 + stn_etime.day,
+				current_channel->latitude,
+				current_channel->longitude,
+				current_channel->elevation/1000,
+				current_station->name,
+				"-",  "-",
+				0.0, 0.0,
+				lddate)) == -1)
+
+// if (fwrite (Wfdisc_buf, strlen(Wfdisc_buf), 1, outfile) != 1)
+
+			{
+				fprintf (stderr, "WARNING (output_css):  ");
+				fprintf (stderr, "failed to properly write CSS SITE data to %s.\n", outfile_name);
+
+				perror("output_css()"); 
+ 
+				fprintf (stderr, "\tExecution continuing.\n");
+			
+			}
+
+		}
+
+		fclose (outfile);
 
 		current_channel = current_channel->next;
 
-	}	/* for channel */
+
+	}	/* for each muxed channel */
 
 
 	/* scan for network/station already there */
@@ -600,11 +608,11 @@ int offset;
 		{
               
                 	fprintf(outfile, 
-				"%-8.8s%-80.80s%-4.4s%-15.15s%8.8d%-17s\n",
+				"%-8s%-80s%-4s%-15s %8d %17s\n",
                                	current_station->network_code,
 				get_net(current_station->owner_code),
-				"-1",
-				"-1",
+				"-",
+				"-",
 				-1,
                                	lddate);
 
@@ -642,6 +650,8 @@ int offset;
 
 			while (t71_ptr)
 			{
+				struct time stime;
+
 		
 				n = split(t71_ptr->origin_time, &jdate, ',');
 
@@ -749,12 +759,93 @@ int offset;
 				t71_ptr = t71_ptr->next;
 
 			}	/* while more t_71s */
+
 		} /* else */
 	}
 
 	chdir(orig_dir);
 
 }
+/**************************************************
+ * int determineChanId()
+ *	helper proc for output_css()
+ *
+ * 	scan file for matching station, increment counter.
+ * 
+ */
+
+int determineChanId(FILE *fptr, char *s)
+
+{
+
+	char *stn; 
+	int n;
+	
+	char buffer[256];	// CSS site file has each record max length=155
+
+	n = 1;
+
+	while (1)
+	{
+				/* note: load date is 2 fields */
+		if (fgets(buffer, (int)sizeof(buffer), fptr) == NULL)
+		{
+			return n;	/* end of the line - bale */
+		}
+
+		stn = strtok(buffer, " ");
+
+		if (strcasecmp(s, stn) == 0)
+		{
+			n++;
+		}
+	}
+
+	/* should never get here */
+	return n;
+}
+
+/*****************************************************
+
+/**************************************************
+ * int chkForStn()
+ *	helper proc for output_css()
+ *
+ * 	scan file for matching station.
+ * 
+ */
+
+int chkForStn(FILE *fptr, char *s)
+
+{
+
+	char *stn; 
+	int n;
+	
+	char buffer[256];	// CSS site file has each record max length=155
+
+	while (1)
+	{
+
+				/* note: load date is 2 fields */
+		if (fgets(buffer, (int)sizeof(buffer), fptr) == NULL)
+		{
+			return 0;	/* end of the line - bale */
+		}
+
+		stn = strtok(buffer, " ");
+
+		if (strcasecmp(s, stn) == 0)
+		{
+			return 1;	/* found it - bale */
+		}
+	}
+
+	/* should never get here */
+	return 1;
+}
+
+/*****************************************************
 
 
 /**************************************************
@@ -765,8 +856,7 @@ int offset;
  * 
  */
 
-int scan_affiliation(fname, n, s)
-char *fname, *s, *n;
+int scan_affiliation(char *fname, char *n, char *s)
 
 {
 	char stn[20], net[20], ld_date[20];

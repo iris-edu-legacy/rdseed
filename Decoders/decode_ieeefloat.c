@@ -32,11 +32,12 @@ int nsamples;
 int index;
 {
 	char *temp;		/* recovers sample from SEED */
+	float *float_ptr;
 	int i;			/* counter */
 
 	char p1, p2;
 
-	float tmp;
+
 
 
 /*                +=========================================+                 */
@@ -45,8 +46,8 @@ int index;
 
 	for (i = index; i < index + nsamples; i++, data_ptr += 4)
 	{
-		/* recover mantissa and gain range factor */
 
+		/* recover mantissa and gain range factor */
 		if (byteswap == TRUE)
 		{
 			temp = (char *) data_ptr;
@@ -60,10 +61,10 @@ int index;
 
 		}
 
-		/* save sample in seismic data array */
-		tmp = (float) *data_ptr;
 
-		*seismic_data_ptr = (double) tmp;
+		float_ptr = (float *)data_ptr;
+
+		*seismic_data_ptr = (double) *float_ptr;
 
 		seismic_data_ptr += 1;
 	}

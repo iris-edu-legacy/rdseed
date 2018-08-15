@@ -80,7 +80,6 @@ void time_span_out ()
  * only...
  *
  */
-
 	if (Seed_flag)
 	{
 		update_type74(data_hdr);
@@ -243,9 +242,7 @@ void time_span_out ()
 					if (end_time_point[i].year == 9999) temp_hdr.nsamples = data_hdr->nsamples;
 
 					if (temp_hdr.nsamples > data_hdr->nsamples) temp_hdr.nsamples = data_hdr->nsamples;
-
 					output_data(&temp_hdr, 0);
-
 				}
 			}
 			else

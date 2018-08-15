@@ -74,6 +74,8 @@ extern int output;
 
 float weed_version = 3.0;
 
+float summary_file_get_version();
+
 read_summary_file(fname)
 char *fname;
 
@@ -189,6 +191,7 @@ char *fname;
 
 		if (strstr(token, "PHASE")) 
                 {
+			char *ch_ptr;
 
 			twindow_ptr = (struct twindow *)
                                         malloc(sizeof(struct twindow));
@@ -213,6 +216,9 @@ char *fname;
                                         time_win_start,
                                         time_win_end);   
 
+			//  replace hyphens with spaces
+			SUBSTR(loc, '-', ' ');
+
 			/* strip out the quotes in the channel list */
 			strncpy(twindow_ptr->chn_list, 
 				&chn[1], /* start quote */
@@ -235,7 +241,7 @@ char *fname;
 			}
 			else
 				strcpy(twindow_ptr->loc_list, "*");
- 
+
 			add_chn(twindow_ptr->chn_list);
 
 			add_loc(twindow_ptr->loc_list);
@@ -297,8 +303,8 @@ char *fname;
                         location_count++;
  
                 } while ((ch = strtok(NULL, ",")) != NULL);
- 
-//	dump_stn_nodes(stn_listhead);
+
+	// dump_stn_nodes(stn_listhead);
 
 
 	return 1;
@@ -613,6 +619,7 @@ int yyyy;
 void set_event(struct time *blk_start, struct time *blk_end)
 
 {
+
 	struct tm tm;
 	time_t t;
 
@@ -632,25 +639,36 @@ void set_event(struct time *blk_start, struct time *blk_end)
 	struct stn_tspan *stn_ptr;
 	struct stn_tspan *sav_stn_ptr;
 
+	float weed_version;
+
+	weed_version = summary_file_get_version();
 
 	char ev_time[200];
 
 	stn_ptr = stn_listhead;
-printf("blk_start=%p, blk_end=%p\n", blk_start, blk_end);
 
 	while (stn_ptr)
         {
 		// extract the yyyy/mm/dd to make into yyyyddd format
 
+		trim(stn_ptr->this_event);
+
 		n = split(stn_ptr->this_event, &c_ptr, ',');
 
-		nn = split(c_ptr[1], &parts, ' ');
+		if (weed_version < 4.0)
+			nn = split(c_ptr[1], &parts, ' ');
+		else
+			nn = split(c_ptr[0], &parts, ' ');
 
-		nnn = split(parts[0], &pieces, '/');
+		if (weed_version < 4.0)
+			nnn = split(parts[0], &pieces, '/');
+		else
+			nnn = split(parts[0], &pieces, '-');
 
 		nnnn = split(parts[1], &bitty_pieces, ':');
 
 		// lop off the frac part if there
+
 		if ((ch = strchr(bitty_pieces[2], '.')) != NULL)
 			*ch = '\0';
 
@@ -694,6 +712,7 @@ printf("blk_start=%p, blk_end=%p\n", blk_start, blk_end);
 		}
 
 		stn_ptr = stn_ptr->next;
+
 	}
 
 	this_event = sav_stn_ptr->this_event;

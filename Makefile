@@ -24,16 +24,16 @@
 CC = cc 
 
 # for cygwin add the -D_CYGWIN flag, for users of windows pcs
-CFLAGS     = -O -m32 -g -D_CYGWIN
+#CFLAGS     = -O -m32 -g -D_CYGWIN
 
 # to compile rdseed as a 32-bit application
 #CFLAGS     = -O -m32 -g 
 
 # uncomment to accommodate earlier versions of Mac OS X
-# CFLAGS = -O -m64 -g -mmacosx-version-min=10.4
+#CFLAGS = -O -m64 -g -mmacosx-version-min=10.4
 
-# else
-#CFLAGS = -O -m64 -g
+#else
+CFLAGS = -O -m64 -g
 
 INCLUDE    = -I../Include
 
@@ -45,7 +45,7 @@ CFLAGSLINE = "$(INCLUDE) $(CFLAGS)"
 LDFLAGS = -lm -lc
 
 # Uncomment this line for Solaris
-# LDFLAGS = -lm -lc -lnsl
+#LDFLAGS = -lm -lc -lnsl
 
 MAKE = make CFLAGS=${CFLAGSLINE} all
 
@@ -85,7 +85,7 @@ OBJS = 	Main/ah_resp.o Main/output_data.o Main/output_sac.o Main/alt_response.o 
 	Snoop/times_data.o
 
 rdseed : Main_dir Ah_dir Decoders_dir Parsers_dir Printers_dir Utilities_dir Snoop_dir
-	${CC} ${CFLAGS} -o $@ ${OBJS} ${LDFLAGS}
+	${CC} ${CFLAGS} -o $@ ${OBJS} ${LDFLAGS} 
 
 Main_dir :
 	cd Main; $(MAKE)

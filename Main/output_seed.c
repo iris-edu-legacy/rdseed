@@ -95,7 +95,7 @@ void position_to_single_record_read(int *, char *, FILE *);
 
 void chdir();
 
-int get_file_size();
+off_t get_file_size();
 char *get_date();
 
 /* ---------------------------------------------------------------------- */
@@ -183,7 +183,8 @@ char *input_data_ptr;
 
 	DataRecNum += LRECL;
 
-	if (DataRecNum % (2 << (type10.log2lrecl - 1)) == 0)
+	// if (DataRecNum % (2 << (type10.log2lrecl - 1)) == 0)
+	if (DataRecNum % (2 << (15 - 1)) == 0)
 	{
 		End_recnum++;
 	 	DataRecNum = 0;
@@ -274,7 +275,6 @@ struct data_hdr *hdr;
 
         getcwd(orig_dir, MAXPATHLEN);
 
-
 	/* if no station/channel information found simply exit */
 	if ((current_station == NULL) || (current_channel == NULL))
 		return;
@@ -283,7 +283,7 @@ struct data_hdr *hdr;
 
 	FILE *outfile;		/* output file pointer */
 
-	int where;
+	off_t where;
 	int vol_lrecl;
 	char pad[512];
 
@@ -301,16 +301,18 @@ struct data_hdr *hdr;
 		return;
 	}
 
-	where = ftell(outfile);
+	where = ftello(outfile);
 
-	vol_lrecl = 2 << (type10.log2lrecl - 1);
+// 	vol_lrecl = 2 << (type10.log2lrecl - 1);
+
+	vol_lrecl = 32768;
 
 	if ((where % vol_lrecl) != 0)
 	{
 		end_sub_seq_num = (where % vol_lrecl)/this_lrecl;
 
 		// pad to logical record boundary
-		while((ftell(outfile) % vol_lrecl) != 0)
+		while((ftello(outfile) % vol_lrecl) != 0)
 		{
 			if (fwrite(pad, 1, sizeof(pad), outfile) != sizeof(pad))
 			{
@@ -318,7 +320,7 @@ struct data_hdr *hdr;
 				fprintf(stderr, "update_type74: Unable pad output file to logical record boundary!\n");
 
 
-				perror("upte_type74");
+				perror("update_type74");
 	
 				chdir(orig_dir);
 			}
@@ -451,10 +453,12 @@ struct data_hdr *hdr;
 	/* if this is changed, make sure to update waffle, which reads
 	 * these fields, stn, chn, net 
 	 */
-	printf("Writing %s %2.2s : %s from %d,%03d,%02d:%02d:%02d,%04d to %d,%03d,%02d:%02d:%02d,%04d\n", hdr->station, 
+	printf("Writing %s,%2.2s,%2.2s,%s from %d,%03d,%02d:%02d:%02d,%04d to %d,%03d,%02d:%02d:%02d,%04d\n", 
+			hdr->station, 
 			type10.version >= 2.3 ?
 				hdr->network:
 				"NA",
+			hdr->location,
 		 	hdr->channel, 
 			hdr->time.year,
 			hdr->time.day,
@@ -497,7 +501,9 @@ struct data_hdr *hdr;
 
 	}
 
-	if (DataRecNum % (2 << (type10.log2lrecl - 1)) != 0)
+//	if (DataRecNum % (2 << (type10.log2lrecl - 1)) != 0)
+	if (DataRecNum % (2 << (15 - 1)) != 0)
+
 	{
 
 			DataRecNum = 0;
@@ -535,7 +541,10 @@ void output_seed_volume()
 	chdir(output_dir);
 
 	/* do headers at 4096 */
-	LRECL = 4096;
+
+	// LRECL = 2 << (type10.log2lrecl - 1);
+
+	LRECL = 32768;
 
 	if (!got_a_time_series)
 	{
@@ -612,8 +621,7 @@ int pack_em()
 
     	struct station_list *s_list_ptr = s_listhead;
     	int num_bytes = 0;
-    	int tot_bytes = 0;
-
+    	off_t tot_bytes = 0;
 
 	char pad[256];
 
@@ -635,7 +643,7 @@ int pack_em()
 		/* one last thing we need to do is to update the control
 	     	 * header with the current record count
 		 */
-		sprintf(wrkstr, "%06d", (int)((ftell(out_fptr) / LRECL) + 1));
+		sprintf(wrkstr, "%06d", (int)((ftello(out_fptr) / LRECL) + 1));
 
 		memcpy(buff, wrkstr, strlen(wrkstr));
 
@@ -662,7 +670,7 @@ int pack_em()
     	{
 
 		/* update control header record count */
-        	sprintf(wrkstr, "%06d", (int)((ftell(out_fptr) / LRECL) + 1)); 
+        	sprintf(wrkstr, "%06d", (int)((ftello(out_fptr) / LRECL) + 1)); 
  
         	memcpy(buff, wrkstr, strlen(wrkstr)); 
 
@@ -696,7 +704,7 @@ int pack_em()
 
 			/* update control header record count */ 
         		sprintf(wrkstr, "%06d", 
-				(int)((ftell(out_fptr) / LRECL) + 1));  
+				(int)((ftello(out_fptr) / LRECL) + 1));  
   
         		memcpy(buff, wrkstr, strlen(wrkstr));  
  
@@ -725,7 +733,7 @@ int pack_em()
     	while ((num_bytes = fread(buff, 1, LRECL, fptr)) > 0)
     	{
 		/* update control header record count */ 
-        	sprintf(wrkstr, "%06d", (int)((ftell(out_fptr) / LRECL) + 1));  
+        	sprintf(wrkstr, "%06d", (int)((ftello(out_fptr) / LRECL) + 1));  
   
         	memcpy(buff, wrkstr, strlen(wrkstr));  
  
@@ -756,7 +764,7 @@ int pack_em()
 		// position_to_single_record_read(&num_bytes, buff, fptr);
 
         	/* update control header record count */ 
-        	sprintf(wrkstr, "%06d", (int)((ftell(out_fptr) / LRECL) + 1));  
+        	sprintf(wrkstr, "%06d", (int)((ftello(out_fptr) / LRECL) + 1));  
   
         	memcpy(buff, wrkstr, strlen(wrkstr));  
  
@@ -833,7 +841,9 @@ int patch_vol_header()
 	char buff[800]; /* must be large enough for max size blk 10 */
 	char tmp_fname[200];
 	char wrkstr[100];
-	int i, ix;
+	int i, nbytes;
+
+	off_t ix;
  
 	FILE *fptr, *fptr_tmp;
 
@@ -982,7 +992,7 @@ int patch_vol_header()
 	/* since rdseed starts at rec # 1 - add one to total */ 
 	ix += 1;
 
-	sprintf(&buff[57], "%06d", ix);	/* seq # starts at byte 57 */
+	sprintf(&buff[57], "%06d", (int)ix);	/* seq # starts at byte 57 */
 	
 	/* out to temp file */
 	if (fwrite(buff, 1, 63, fptr_tmp) != 63)
@@ -992,11 +1002,11 @@ int patch_vol_header()
 	}  
  
 	/* now the rest - blank fill until LRECL boundary */
-	while ((ix = fread(buff, 1, sizeof(buff), fptr)) != 0)
-		if (fwrite(buff, 1, ix, fptr_tmp) != ix)
+	while ((nbytes = fread(buff, 1, sizeof(buff), fptr)) != 0)
+		if (fwrite(buff, 1, nbytes, fptr_tmp) != nbytes)
 		{
 			perror("patch_vol_header");
-        	return 0;
+        		return 0;
 		}
 
 	fclose(fptr);
@@ -1018,7 +1028,7 @@ int patch_70()
 
 int num_bytes;
 	
-	int where, xx;
+	off_t where, xx;
 
 	struct local_type74 *t_74;
 
@@ -1190,7 +1200,7 @@ int num_bytes;
     
         			ix = atoi(wrkstr);
  
-        			sprintf(wrkstr, "%06d", ix + where);
+        			sprintf(wrkstr, "%06d", (int)(ix + where));
         			memcpy(t_74->start_index, 
 					wrkstr, 	
 					strlen(wrkstr));
@@ -1210,7 +1220,7 @@ int num_bytes;
 
 				/* ix++; */
  
-        			sprintf(wrkstr, "%06d", ix + where);
+        			sprintf(wrkstr, "%06d", (int)(ix + where));
         			memcpy(t_74->end_index, 
 					wrkstr, 
 					strlen(wrkstr));
@@ -2445,7 +2455,9 @@ int output_volume_headers()
 	sprintf(c_ptr, "0100000");
 	c_ptr = buff + strlen(buff);  			/* type plus size */
 
-	sprintf(c_ptr, "%04.1f%02d", type10.version, type10.log2lrecl);
+//	sprintf(c_ptr, "%04.1f%02d", type10.version, type10.log2lrecl);
+	sprintf(c_ptr, "%04.1f%02d", type10.version, 15);
+
 	c_ptr = buff + strlen(buff);
 
 	sprintf(c_ptr, "%4d,%03d,%02d:%02d:%02d.%04d~", 
@@ -2564,7 +2576,7 @@ char type;		/* holds 'V' for volume, 'S' etc... */
 		fill_to_LRECL(fptr);
 
 		/* make new control header - continuous by definition */
-		sprintf(wrkstr, "%06d%c*", (int)((ftell(fptr) / LRECL) + 1), type);
+		sprintf(wrkstr, "%06d%c*", (int)((ftello(fptr) / LRECL) + 1), type);
  
         	if (fwrite(wrkstr, 1, strlen(wrkstr), fptr) != strlen(wrkstr))
 		{
@@ -2577,10 +2589,10 @@ char type;		/* holds 'V' for volume, 'S' etc... */
 	}
 
 	/* is it time for a control header? */
-	if (((ftell(fptr) % LRECL) == 0) || (ftell(fptr) == 0))
+	if (((ftello(fptr) % LRECL) == 0) || (ftello(fptr) == 0))
 	{
 		
-		sprintf(wrkstr, "%06d%c ", (int)((ftell(fptr) / LRECL) + 1), type);
+		sprintf(wrkstr, "%06d%c ", (int)((ftello(fptr) / LRECL) + 1), type);
 
 		if (fwrite(wrkstr, 1, strlen(wrkstr), fptr) != strlen(wrkstr))
 		{
@@ -2597,9 +2609,9 @@ char type;		/* holds 'V' for volume, 'S' etc... */
 	while (i < n)
 	{
 		/* is it time for a control header? */
-		if ((ftell(fptr) % LRECL) == 0)
+		if ((ftello(fptr) % LRECL) == 0)
 		{
-			sprintf(wrkstr, "%06d%c*", (int)((ftell(fptr) / LRECL) + 1), type); 
+			sprintf(wrkstr, "%06d%c*", (int)((ftello(fptr) / LRECL) + 1), type); 
  
         		if (fwrite(wrkstr, 
 				   1, 
@@ -2657,7 +2669,7 @@ char *s;
 	char fname[200];
 	
 	struct station_list *s_list_ptr = s_listhead;
-	int i;
+	off_t i;
 	
 	/* start here */
 	i = get_file_size(VOL_FNAME) + get_file_size(ABBREV_FNAME);
@@ -2732,7 +2744,7 @@ int get_all_stations_fsize()
 	char fname[200];
     
 	struct station_list *s_list_ptr = s_listhead;
-	int num_bytes = 0;
+	off_t num_bytes = 0;
     
 	while (s_list_ptr)
 	{  
@@ -2803,9 +2815,9 @@ int fill_to_LRECL(fptr)
 FILE *fptr;
 
 {
-	if ((ftell(fptr) % LRECL) != 0)
+	if ((ftello(fptr) % LRECL) != 0)
 	{
-		while((ftell(fptr) % LRECL))
+		while((ftello(fptr) % LRECL))
 		{
 			if (fputc(' ', fptr) != ' ')
 				return 0;
@@ -2823,9 +2835,9 @@ FILE *fptr;
 int span;
 
 {
-        int where;
+        off_t where;
 
-        where = ftell(fptr);
+        where = ftello(fptr);
 
         if (((where + span) / LRECL) > (where / LRECL))
                 if ((where + span) % LRECL) /* land right on boundary */
@@ -2838,7 +2850,7 @@ int span;
 
 /* --------------------------------------------------------------------- */
 
-int get_file_size(f)
+off_t get_file_size(f)
 char *f;
 
 {

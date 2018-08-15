@@ -835,7 +835,8 @@ version 5.1
 	New output file formats.  Support for 2 SimpleAscii text file formats.
 
 	Changed internal data representation from floats to doubles to allow for
-	a greater sample range.
+	a greater sample range. New decoder for ieeedouble.
+
 
 	Rdseed miniseed output as doubles has been added along with the usual steim compressed integers.
 	
@@ -871,4 +872,39 @@ version 5.2
         Minor mods to the option prompts for Comments (added [B]oth).
         Added in some user feedback for RESP file, rdseed station/event files output.
 
+version 5.3
+
+	Quality code preserved for miniseed output
+
+        Upgrades to support JWEEDv4.0's new summary file processing.
+
+        Bug fix for meta-data lacking responses
+
+        Simple ASCII text output's month was off by 1, as it started with jan = 0
+
+        Modification made to allow rdseed's process_data() to only display one error/warning per
+                timespan. Previous to this, every data record would result in a message.
+      
+	Modifications to CSS output files. 
+		eliminated duplicate stations in network file.
+		added station and channel end times (rdseed.sitechan)
+		column EDEPTH changed from meters to Km (sitechan)
+		added in channel id to sitechan file
+		instead of channel code, made it a combination channel/location code (sitechan) so
+		it matches wfdisc
+
+		number of samples limited to maximum as defined in the wfdisc table (99999999)
+			issues a warning to the user that it will break at this number
+		 
+	Fix needed for seed volume output, option '5' for large seed volumes requiring a larger logical
+	records size.
+
+	Fix needed for seed volume output, option '5', when using a dataless seed volume and a mini 
+	seed volume. If the resulting seed volume is so large that the logical record needed to be
+	greater than what is in the originating dataless, rdseed needed to be programmed to compute and
+	use the larger logical record size.
+
+        fixed bug in ieeefloat decoding.
+
+        took out extraneous debug message
 	

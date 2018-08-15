@@ -87,7 +87,7 @@
 #define TIME_PRECISION 10000		/* number of divisions in a */
 					/* second in SEED times */
 
-extern struct stn_list *stn_listhead;
+int tspan_flag;		// used to only print errors and warnings once.
 
 struct type50 *get_station_rec();
 struct type52 *get_channel_rec();
@@ -306,22 +306,27 @@ void process_data (int fsdh_swapped)
 				this_location,
 				NULL);
 
-		if (current_station == NULL || current_channel == NULL)
+		if (tspan_flag)
 		{
-			fprintf(stderr, "WARNING (process_data):  ");
 
-			fprintf (stderr, "station/channel %s/%s not found in station/channel tables for network %2.2s, location code:%2.2s.\n", this_station, this_channel, type10.version >= 2.3 ? network_code : "N/A", this_location);
+			if (current_station == NULL || current_channel == NULL)
+			{
+				fprintf(stderr, "WARNING (process_data):  ");
 
+				fprintf (stderr, "station/channel %s/%s not found in station/channel tables for network %2.2s, location code:%2.2s.\n", this_station, this_channel, type10.version >= 2.3 ? network_code : "N/A", this_location);
  
-        		fprintf (stderr, "\tData Record Skipped.\n");
- 
-                	/* toggle = FALSE; */
+        			fprintf (stderr, "\tData Record Skipped.\n");
 
-                	current_station = old_current_station;
-			current_channel = old_current_channel;
- 
-                	return;
+                		/* toggle = FALSE; */
 
+                		current_station = old_current_station;
+				current_channel = old_current_channel;
+
+				tspan_flag = FALSE;
+ 
+                		return;
+
+			}
 		}
 
 	}
@@ -391,6 +396,15 @@ void process_data (int fsdh_swapped)
 
 	this_time.fracsec = input_data_hdr->time.fracsec;
 
+/* ***********
+
+printf("\n>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<\n");
+
+printf("input_data=%d,%d:%d:%d.%d\n", input_data_hdr->time.day, input_data_hdr->time.hour, 
+	input_data_hdr->time.minute, input_data_hdr->time.second, input_data_hdr->time.fracsec);
+
+********** */
+
 	/* Do time correction  -  not for miniseed output as the fsdh activity flag 
 	 * still indicates Not applied upon output
 	 */
@@ -456,10 +470,13 @@ void process_data (int fsdh_swapped)
 
                 if (current_station == NULL || current_channel == NULL)
                 {
-                	fprintf (stderr, "WARNING (process_data):  ");
-                	fprintf (stderr, "station %s %s response effective time not found in station table.\n", this_station,this_channel);
+			if (tspan_flag)
+			{
+	           	     	fprintf (stderr, "WARNING (process_data):  ");
+        	        	fprintf (stderr, "station %s %s response effective time not found in station table.\n", this_station,this_channel);
  
-                	fprintf (stderr, "\tTrying again ignoring effective times.\n");
+                		fprintf (stderr, "\tTrying again ignoring effective times.\n");
+			}
  
                 	get_stn_chn_rec(this_station,
 					  this_channel,
@@ -469,21 +486,32 @@ void process_data (int fsdh_swapped)
  
                 	if (current_station == NULL || current_channel == NULL)
                 	{
-                        	fprintf(stderr, "ERROR - unable to locate any station/channel record for station:%s, channel: %s, network:%s\n\nSkipping data record!\n", 
-				   this_station,
-				   this_channel,
-                                   type10.version >= 2.3 ?
-                                   	network_code:
-                                       		"N/A");
- 
+	
+				if (tspan_flag)
+				{	
+                      		  	fprintf(stderr, "ERROR - unable to locate any station/channel record for station:%s, channel: %s, network:%s\n\nSkipping data record!\n", 
+					   this_station,
+					   this_channel,
+        	                           type10.version >= 2.3 ?
+                	                   	network_code:
+                        	               		"N/A");
+ 				}
+
                         	current_station = old_current_station;
 				current_channel = old_current_channel;
  
+				tspan_flag = FALSE;
+
                         	return;
  
                 	}
 			else
-				fprintf(stderr, "Found stn/chn record.\n");
+			{
+				if (tspan_flag)
+					fprintf(stderr, "Found stn/chn record.\n");
+			}
+
+			tspan_flag = FALSE;
 
                 }
 	} 
@@ -630,6 +658,7 @@ void process_data (int fsdh_swapped)
         		return;
 		}
 	}
+
 #if 0
 
 	else
@@ -652,7 +681,6 @@ void process_data (int fsdh_swapped)
 
 	newtime = timeadd_double(last_time, duration);
 
-// printf("last time block end time =%d,%d,%d:%d:%d.%d\n", newtime.year, newtime.day, newtime.hour, newtime.minute, newtime.second, newtime.fracsec);
 
 
 /*                 +=======================================+                 */
@@ -666,12 +694,18 @@ void process_data (int fsdh_swapped)
 	 * seed file output. Don't clip on zero sample record
 	 */
 
-// printf("checking time %d:%d:%d.%d\n", data_hdr->time.hour, data_hdr->time.minute, data_hdr->time.second, data_hdr->time.fracsec);
+/* **********
 
-// printf("this time = %d:%d:%d.%d\n", this_time.hour, this_time.minute, this_time.second, this_time.fracsec);
+printf("checking time %d:%d:%d.%d\n", data_hdr->time.hour, data_hdr->time.minute, data_hdr->time.second, data_hdr->time.fracsec);
+
+printf("last time =%d,%d:%d:%d.%d\n", last_time.day, last_time.hour, last_time.minute, last_time.second, last_time.fracsec);
+
+printf("last time end time =%d,%d:%d:%d.%d\n", newtime.day, newtime.hour, newtime.minute, newtime.second, newtime.fracsec);
+
+printf("this time = %d,%d:%d:%d.%d\n", this_time.day, this_time.hour, this_time.minute, this_time.second, this_time.fracsec);
+ ********* */
+
 // printf("  last time = %d:%d:%d.%d\n", newtime.hour, newtime.minute, newtime.second, newtime.fracsec);
-
-
 
 	if (this_nsamples == 0)
 		continuous = TRUE;
@@ -679,13 +713,20 @@ void process_data (int fsdh_swapped)
 		if ((strcmp (data_hdr->station, this_station) == 0) &&
 			(strcmp (data_hdr->channel, this_channel) == 0) &&
 			(strcmp (data_hdr->location, this_location) == 0) &&
-			(now_quality == prev_quality) &&
+			// (now_quality == prev_quality) &&
 			(timetol (newtime, this_time, last_nsamples, this_sample_rate) == 0))
 		{
 			continuous = TRUE;
 		}
 		else 
 		{
+/* *********
+
+printf("*************\n\tprev_time=%d,%d:%d:%d.%d\n", newtime.day, newtime.hour, newtime.minute, newtime.second, newtime.fracsec);
+
+printf("\tthis time=%d,%d:%d:%d.%d\n***************\n", this_time.day, this_time.hour, this_time.minute, this_time.second, this_time.fracsec);
+********** */
+
 			continuous = FALSE;
 			output_overflow = FALSE;
 		}
@@ -1384,28 +1425,41 @@ char *s, *c, *n, *l, *t; 		/* station, channel, net, time */
 
 	if ((current_station == NULL) || (current_channel == NULL)) 
         {
-                fprintf (stderr, "WARNING (get_stn_chn_rec_Lrecl()):  ");
-                fprintf (stderr, "station/channel %s/%s not found in station/channel tables.\n", s, c);
+
+		if (tspan_flag)
+		{
+
+	                fprintf (stderr, "WARNING (get_stn_chn_rec_Lrecl()):  ");
+        	        fprintf (stderr, "station/channel %s/%s not found in station/channel tables.\n", s, c);
  
-                fprintf (stderr, "\tTrying again ignoring effective times.\n");
+	                fprintf (stderr, "\tTrying again ignoring effective times.\n");
+		}
 
 		get_stn_chn_rec(s, c, n, l, NULL);
 
 		if ((current_station == NULL) || (current_channel == NULL)) 
 		{
+			if (tspan_flag)
+			{       
 
-			fprintf (stderr, "WARNING (get_stn_chn_Lrecl()):  ");
-                	fprintf (stderr, "station/channel %s/%s not found in station table.\n", s, c);  
+				fprintf (stderr, "WARNING (get_stn_chn_Lrecl()):  ");
+				fprintf (stderr, "station/channel %s/%s not found in station table.\n", s, c);  
 
-			fprintf(stderr, "Unable to determine the logical record length for station/channel %s/%s for location:\nDefaulting to 4096\n", s, c, l);
+				fprintf(stderr, "Unable to determine the logical record length for station/channel %s/%s for location:\nDefaulting to 4096\n", s, c, l);
 
+			}
+
+			tspan_flag = FALSE;
+	
 			return 4096;
 
 		}
 		else
 			fprintf(stderr, "Found stn/chn record\n");
-	}
 
+		tspan_flag = FALSE;
+
+	}
 
 	return 2 << (current_channel->log2drecl - 1);	
 

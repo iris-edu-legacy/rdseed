@@ -100,7 +100,7 @@ void save_myfprintf(FILE *fp, ...)
 	va_start(ap, fp);
 
 	va_copy(aq, ap);
-
+	
 	fmt = va_arg(ap, char *);
 
 	vfprintf(fp, fmt, ap);
@@ -109,7 +109,7 @@ void save_myfprintf(FILE *fp, ...)
 
 	/* if output to stderr, then add to log file */
 	if (error_log_inited && fp == stderr)
-		stderr_to_file(fmt, aq);
+		stderr_to_file(aq);
 
 	va_end(ap);
 	va_end(aq);
@@ -120,12 +120,12 @@ void save_myfprintf(FILE *fp, ...)
 
 /* ----------------------------------------------------------------------- */
 
-void stderr_to_file(fmt, ap)
-char *fmt;
-va_list ap;
+void stderr_to_file(va_list ap)
 
 
 {
+	char * fmt;
+
 	FILE *fptr;
 	
 	char now_dir[MAXPATHLEN];
@@ -139,7 +139,9 @@ va_list ap;
 
 	if (!header_added)
 		add_header(fptr);
-	 
+
+	fmt = va_arg(ap, char *);
+
 	vfprintf(fptr, fmt, ap);
 
 	fclose(fptr);

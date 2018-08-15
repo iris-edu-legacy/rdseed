@@ -164,7 +164,6 @@ int simple_flag;
 	char orig_dir[MAXPATHLEN];
 	char type_label[30];
 
-
 	getcwd(orig_dir, MAXPATHLEN);
 
 	chdir(output_dir);
@@ -465,7 +464,7 @@ int simple_flag;
 		tm_ptr= gmtime(&t);
 
 		sprintf(date_time, "%d-%02d-%02dT%02d:%02d:%02d.%04d00", 
-				1900 + tm_ptr->tm_year, tm_ptr->tm_mon, tm_ptr->tm_mday, 
+				1900 + tm_ptr->tm_year, tm_ptr->tm_mon + 1, tm_ptr->tm_mday, 
 				tm_ptr->tm_hour, tm_ptr->tm_min, tm_ptr->tm_sec,
 				 data_hdr->time.fracsec);
 
@@ -521,7 +520,7 @@ int simple_flag;
 				//		fracs);
 
 				fprintf(outfile, "%d-%02d-%02dT%02d:%02d:%02d.%04d00  %15.7g\n", 
-						newtime.year, tm_ptr->tm_mon, tm_ptr->tm_mday, 
+						newtime.year, tm_ptr->tm_mon + 1, tm_ptr->tm_mday, 
 						newtime.hour, newtime.minute, newtime.second,
 						newtime.fracsec, seismic_data[offset+i+j]);
 

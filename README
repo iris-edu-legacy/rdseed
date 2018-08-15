@@ -14,7 +14,9 @@ Rdseed Version 5.2
 	www.cygwin.com and download the most recent version of the DLL. You will
 	also need to download the gcc and make tools if you wish to compile rdseed.
 	rdseed also requires the "more" utility, found as of this writing at:
-	http://cygwin.com/packages/util-linux/
+		http://cygwin.com/packages/util-linux/
+
+	You will need to run rdseed within the CYGWIN shell.
 	
 	
 Installation:

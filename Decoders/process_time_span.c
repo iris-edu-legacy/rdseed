@@ -123,7 +123,8 @@ process_type74()
 }
 
 /* --------------------------------------------------------------------- */
-extern struct stn_list *stn_listhead;
+extern int tspan_flag;		// declared in process_data.c. Used so process_data will
+				// spit out warns and errors for one timespan, not every record
 
 int extract_this_timespan(t74)
 struct type74 *t74;
@@ -136,9 +137,12 @@ struct type74 *t74;
 
 	default_Lrecl = LRECL;
 
+	tspan_flag = TRUE;
+
 	now_where = ftello(inputfile);
 
-	fseeko(inputfile, ((t74->start_index-1)*LRECL) - now_where, 1);
+	if (fseeko(inputfile, ((t74->start_index-1)*LRECL) - now_where, 1) == -1)
+		perror("time_span_out");
 
 	LRECL = get_stn_chn_Lrecl(t74->station,
 				  t74->channel,
@@ -163,10 +167,11 @@ struct type74 *t74;
 	/* we are assuming that the data record size will not
 	 * change for a timespan 
 	 */
-	LRECL = get_blk_1000_Lrecl(inputfile);
+ 	LRECL = get_blk_1000_Lrecl(inputfile);
 
 	for (j = t74->start_index; j <= t74->end_index; j++)
 	{ 
+	
 		for (i = 1; i <= default_Lrecl/LRECL; i++)
 		{ 
 
@@ -195,7 +200,7 @@ struct type74 *t74;
 			lrecord_ptr = (char *)precord;
 
 			read_logical_record (lrecord_ptr);
- 
+
 			process_data (0);
  
 		}

@@ -427,6 +427,8 @@ int asciiflag;
 
 		if (read_summary_flag)
 		{
+			// char *ev;
+
 			char **parts;
 			char **pieces;
 			int n, nn;
@@ -436,6 +438,8 @@ int asciiflag;
 			float weed_version;
 
 			weed_version = summary_file_get_version();
+
+			// ev = summary_file_get_event();
 
 			n = split(summary_file_get_event(), &parts, ',');
 
@@ -466,55 +470,80 @@ int asciiflag;
 				else
 					n = 6;
 	
-				switch (n)
-				{
-					case 9 : /* Use 1st mag, it is paired like this 
-						  * MB,  5.8, MS,  6.1, ML,  6.2, MW,  6.3
-						  */
-						sach.mag = atof(parts[8]);	
+			switch (n)
+			{
+				case 9 : /* Use 1st mag, it is paired like this 
+					  * MB,  5.8, MS,  6.1, ML,  6.2, MW,  6.3
+					  */
+					sach.mag = atof(parts[8]);	
 
-					case 6:
-						if (weed_version >= 3.0)
-						{
-							/* Use 1st magn */
-							/* mags look like: MB/6.1,MB/6.1,MB/6.1,MB/6.1,MB/6.1 */
-
+				case 6:
+					if (weed_version >= 3.0 && weed_version < 4.0)
+					{
+						/* Use 1st magn */
+						/* mags look like: MB/6.1,MB/6.1,MB/6.1,MB/6.1,MB/6.1 */
 							
-							nn = split(parts[5], &pieces, '/');
+						nn = split(parts[5], &pieces, '/');
 	
-							if (nn != 2)
-							{
-								fprintf(stderr, "Error - output_sac, unable to extract event info for sac header!\n");
-								fprintf(stderr, "Unable to parse event magnitude from the summary file\n");
-								fprintf(stderr, "Event: %s\n", summary_file_get_event());
-							}
-							else
-							{
-								sach.mag = atof(pieces[1]);
-							}
-	
-							fuse(&pieces, nn);
+						if (nn != 2)
+						{
+							fprintf(stderr, "Error - output_sac, unable to extract event info for sac header!\n");
+							fprintf(stderr, "Unable to parse event magnitude from the summary file\n");
+							fprintf(stderr, "Event: %s\n", summary_file_get_event());
 						}
+						else
+						{
+							sach.mag = atof(pieces[1]);
+						}
+	
+						fuse(&pieces, nn);
+					}
 
-					case 5:
-						/* depth */ 
+					if (weed_version >= 4)
+					{
+						// event info looks like: 2012-04-11 22:15:26.3000,0.514,92.443,13.8,MB,5.0
+						sach.mag = atof(parts[5]);
+					}
+
+
+				case 5:
+					/* depth */ 
+					if (weed_version < 4)
 						sach.evdp = atof(parts[4]);  /* Keep as KILOMETERS, version 5.1*/
 
-	
-					case 4:
+				case 4:
+					if (weed_version < 4)
 						/* longitude */
 						sach.evlo = atof(parts[3]);
+					else
+						/* depth */
+						sach.evdp = atof(parts[3]);
 	
-					case 3:
+				case 3:
+
+					if (weed_version < 4)
 						/* latitude */
 						sach.evla = atof(parts[2]); 
+					else
+						/* longitude */	
+						sach.evlo = atof(parts[2]);
 						
-					case 2:
+				case 2:
+					if (weed_version < 4)
 						/* save ev time for later computation */
 						strcpy(event_time, parts[1]);
-			
-				}		// switch
+					else
+						/* latitude */
+						sach.evla = atof(parts[1]);
+		
+				case 1:
+
+					if (weed_version >= 4)
+						/* save ev time for later computation */
+                                                strcpy(event_time, parts[0]);
 	
+			}		// switch
+
 			/* convert from YY/MM/DD... to time structure */
 			timecvt(&ev_time, event_time);
 	
@@ -535,16 +564,16 @@ int asciiflag;
 					sach.mag = type71_head->magnitude[0].magnitude;
 
 				timecvt(&ev_time, type71_head->origin_time);
+
 			}
 		
-		if (read_summary_flag || type71_head != NULL)
+		if (read_summary_flag || (type71_head != NULL))
 		{
 			int error = 0;
 
 			error = delaz(sach.evla, sach.evlo,
 				      sach.stla, sach.stlo,
 				      &sach.gcarc, &sach.az, &sach.baz);
-
 
 			if (error)
 			{
@@ -560,7 +589,7 @@ int asciiflag;
 
 			/* timedif gives back 10000ths, convert to seconds */
 			sach.o = (float) timedif(trace_time, ev_time) / 10000;
-					
+			
 		}	/* if event lat/lon/depth */
 
 		/* mysterious LLL-set values */
@@ -1204,6 +1233,24 @@ int write_out_PnZs(struct time start, struct time end)
 
 	resp = current_channel->response_head;
 
+	if (resp == NULL)
+	{
+		fprintf(stderr, "WARNING (write_out_PnZs):  ");
+		fprintf(stderr, "Missing response information for network/station/location/channel: %s, %s, %s, %s\n",
+				current_station->network_code,
+				current_station->station,
+				current_channel->location,
+				current_channel->channel);
+
+		fprintf(stderr, "\tChannel effective time: %s to %s\n", current_channel->start, current_channel->end);
+	
+		fprintf(stderr, "Skipping\n");
+
+		return;
+
+	}
+
+
 	type_53 = NULL;
 
 	type_43 = NULL;
@@ -1530,6 +1577,7 @@ int write_out_PnZs(struct time start, struct time end)
                 fprintf(stderr, "Warning - couldn't find the abbrevation for the signal units code! Signal units code =%d\n", current_channel->signal_units_code);
 
                 fprintf(stderr, "For station: %s; channel: %s\n\n", current_station->station, current_channel->channel);
+		fprintf(stderr, "\tChannel effective time: %s to %s\n", current_channel->start, current_channel->end);
 
                 fprintf(stderr, "Setting the number of zeros to add to 0\n");
 
@@ -1564,6 +1612,8 @@ int write_out_PnZs(struct time start, struct time end)
                  	fprintf(stderr, "WARNING - Unable to annotate the INSTGAIN, setting to zero\n");
 
 			fprintf(stderr, "For station: %s; channel: %s\n", current_station->station, current_channel->channel);
+			fprintf(stderr, "\tChannel effective time: %s to %s\n", current_channel->start, current_channel->end);
+
 			stage1gain = 1;
 		}
 		else
@@ -1740,6 +1790,7 @@ struct time *e;
 char *get_event_dir_name()
 
 {
+	float weed_version;
 
 	static char dirname[100];
 
@@ -1751,11 +1802,22 @@ char *get_event_dir_name()
 	/* we only need the event line up to the data and time */
 	strncpy(this_event, summary_file_get_event(), 100);
 
-	/* skip the source */
-	p = strtok(this_event, ",");
+	weed_version = summary_file_get_version();
 
-	/* copy entire date/time field */
-	p = strtok(NULL, ",");
+	if (weed_version < 4)
+	{
+		/* skip the source */
+		p = strtok(this_event, ",");
+	
+		/* copy entire date/time field */
+		p = strtok(NULL, ",");
+
+	}
+	else
+	{
+		/* copy entire date/time field */
+		p = strtok(this_event, ",");
+	}
 
 	if (p == NULL)
 	{
@@ -1765,7 +1827,10 @@ char *get_event_dir_name()
 	strcpy(this_date_time, p);
 	
 	/* date and time */
-       	p = strtok(this_date_time, "/");
+	if (weed_version < 4)
+       		p = strtok(this_date_time, "/");
+	else
+		p = strtok(this_date_time, "-");
 
 	if (p == NULL)
 		p = "";
@@ -1774,7 +1839,10 @@ char *get_event_dir_name()
 	sprintf(dirname, "Event_%d.", atoi(p));
 
 	/* month */
-	p = strtok(NULL, "/");
+	if (weed_version < 4)
+		p = strtok(NULL, "/");
+	else
+                p = strtok(NULL, "-");
 
 	if (p == NULL)
 		p = "";
@@ -1790,7 +1858,7 @@ char *get_event_dir_name()
         
 	sprintf(wrkstr, ".%02d", atoi(p)); 
 	strcat(dirname, wrkstr);
- 
+
 	/* hour:minute:second.frac */
 	p = strtok(NULL, ":");
 
@@ -1827,7 +1895,6 @@ char *get_event_dir_name()
 	sprintf(wrkstr, ".%02d", atoi(p));
 	strcat(dirname, wrkstr);
  
-
 	return dirname;
 
 }		/* get_event_dir_name() */

@@ -35,6 +35,8 @@ char *get_event_dir_name();
 
 void blockette_swap(struct data_blk_hdr *b_ptr);
 
+extern char prev_quality;
+
 extern int EventDirFlag;
 
 struct type50 *get_station_rec();
@@ -177,8 +179,9 @@ int offset;
 		fsdh.hdr.time.second = data_hdr->time.second; 
 		fsdh.hdr.time.fracsec= data_hdr->time.fracsec; 
         
-		// we've lost the actual data type, could be more than one, Q,D,R or M 
-		fsdh.Data_header_indicator = 'D';
+		// saved from process_data
+
+		fsdh.Data_header_indicator = prev_quality;
 
 		/* data_hdr's nsamples are accumulated over the entire time span */
 		fsdh.hdr.nsamples = data_hdr->nsamples;

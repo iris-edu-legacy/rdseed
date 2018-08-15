@@ -114,17 +114,6 @@ char *blockette;								/* ptr to start of blockette */
 				current_station->station, 
 				current_channel->channel,
 				type53->pole[i].real);
-#if 0 
-=========================
-
-		if ((!strcmp(type53->transfer,"A") || !strcmp(type53->transfer,"B")) &&
-		     type53->pole[i].real_error > 0.0)  
-			fprintf(stderr, "Warning! Station/channel: %s/%s has a pole with a error value > 0.0\n", 
-				current_station->station, 
-                current_channel->channel,   
-                type53->pole[i].real_error);
-#endif
-
 
 	}
 

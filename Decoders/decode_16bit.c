@@ -59,7 +59,7 @@ fptr = fopen("16bit.out", "a+");
 		temp_2byte = (short *) data_ptr;
 
 		if (byteswap == TRUE)
-		*temp_2byte = swap_2byte (*temp_2byte);
+			*temp_2byte = swap_2byte (*temp_2byte);
 
 		*seismic_data_ptr = (double) *temp_2byte;
 
