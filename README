@@ -1,0 +1,104 @@
+Rdseed Version 5.2 
+
+	This is the SEED reader program as distributed by the IRIS DMC.
+	The version will read SEED volumes up to version 2.4
+
+	The distribution includes all sources needed for compiling for the 
+	host computer.
+
+	The current version is developed for the Sun computer, but should be
+	compatible for other UNIX systems as well.
+
+	As of version 5.2 rdseed now runs on Windows PC utilizing CYGWIN 
+	technologies. For information on downloading the CGYWIN tools go to
+	www.cygwin.com and download the most recent version of the DLL. You will
+	also need to download the gcc and make tools if you wish to compile rdseed.
+	rdseed also requires the "more" utility, found as of this writing at:
+	http://cygwin.com/packages/util-linux/
+	
+	
+Installation:
+	
+	program name: rdseed
+
+	Use the tar command to "extract" binary and sources, i.e:
+		tar -xvf rdseed.tar .
+
+	(You already must have done this in order to be reading this now)
+
+	This will yield a top level directory named rdseed with
+	an executable, along with other miscellaneous files.
+
+	The C source files are located in the sub-directories.
+
+
+	As distributed there are five excutables. They are:
+
+		rdseed.mac.x86_64            -- for Mac on an Intel platform
+		rdseed.rh6.linux_64          -- for Red Hat version 6 on an Intel platform
+		rdseed.solaris.sparc_64      -- for Solaris running on a Sun/Sparc platform
+		rdseed.solaris.x86_64        -- for Solaris running on a Sun/Intel platform
+		rdseed.windows.cygwin_32.exe -- for Cygwin running on Windows 7 (32 bit app only)
+	
+	To install without "make":
+		change directory to rdseed
+
+	If your operating system is Windows, Mac OSX, Linux or Solaris, move the appropriate file a directory 
+	in your path, perhaps renaming it to rdseed.  For example, if your operating system is Linux and you 
+	want to put it in /usr/local/bin, the command would be:
+		 cp -p rdseed.rh6.linux_64 /usr/local/bin/rdseed 
+
+	assuming you have write permission to that directory.
+
+		copy the man pages rdseed.l into the man directory, typically
+
+		/usr/local/man/man1/rdseed.1
+
+	To recompile:	
+		change directory to rdseed
+
+		First to make sure we have a "clean" tar version, enter :
+			make clean
+				at the command line.
+
+		Edit the makefile's LDFLAGS variable to either:
+
+		for Solaris: LDFLAGS = -lm -lc -lnsl
+
+		for Linux, Mac OSX, PC: LDFLAGS = -lm -lc
+
+		Comment out one or the other entry in the makefile as
+		is appropriate for your system.
+
+		Then enter:
+			make
+
+		at the command line.
+
+		After a few minutes you will have an executable for your 
+		machine.
+	
+		Again, copy executable into your path, plus add the man page to
+		your man page directory as described above.
+
+	32 bit systems:
+
+		Since version 5.0 of rdseed, all of the released executables have been 64-bit binaries.  
+		This will cause problems on older 32-bit systems, which will report a 'bad executable' 
+		error or report a 'wrong CPU type'.  This is necessary to support some of rdseed's newer 
+		features and rdseed running as a 32-bit application may experience some limitations when 
+		processing large datasets.
+
+		Nonetheless, you can recompile rdseed as a 32-bit application and get reliable functionality 
+		equivalent to versions 4.8 and earlier.  There is a makefile in the distribution where you 
+		uncomment the CFLAGS line to force 32-bit compilation:
+
+		#CFLAGS = -O -m32 -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE
+
+		Uncomment this by removing the hash mark, then save the makefile and type:
+
+		make clean
+		make
+
+		The executable is named 'rdseed' by default and should now be executable on 32-bit systems.
+

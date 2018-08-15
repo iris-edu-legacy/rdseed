@@ -1,0 +1,759 @@
+.\" @(#)rdseed.l 5.2;
+.\"===========================================================================*
+.\" SEED reader    |                rdseed                 |      manual page |
+.\"===========================================================================*
+.\"                *=======================================*
+.\"================|     Manual page header definition     |===================
+.\"                *=======================================*
+.TH "RDSEED 5.2" LOCAL "January 2012" "IRIS DMC" "IRIS Software Manual"
+.\"                *=======================================*
+.\"================|     Command name and description      |===================
+.\"                *=======================================*
+.SH NAME
+rdseed - Read an FDSN SEED formatted volume
+.\"                *=======================================*
+.\"================|           Command synopsis            |===================
+.\"                *=======================================*
+.\" a short synopsis of the command syntax, including its options and arguments
+.SH SYNOPSIS
+.B rdseed
+.B "[options] [-f filename]"
+.br
+.nf
+.\"                *=======================================*
+.\"================|           Command options             |===================
+.\"                *=======================================*
+.SH OPTIONS
+The following options may be selected:
+.TP
+.B \-a
+retrieve the abbreviation dictionaries
+.TP
+.B \-b n
+set the seismogram input buffer size (bytes)
+.TP
+.B \-c
+retrieve volume table of contents
+.TP
+.B \-C arg
+retrieve the comments where arg is either STN or CHN
+.TP
+.B \-d
+output data records (follow with -o to select a format or it defaults to SAC)
+.TP
+.B \-e
+extract event/station data
+.TP
+.B \-E
+output filename will include endtime
+.TP
+.B \-f file
+input file name
+.TP
+.B \-g file
+specify alternate SEED volume for metadata (see ALT_RESPONSE_FILE)
+.TP
+.B \-h
+help (this list)
+.TP
+.B \-i
+ignore location codes
+.TP
+.B \-k
+strip records from output which have a zero sample count (miniSEED and SEED output only)
+.TP
+.B \-l
+list contents of each record in the volume
+.TP
+.B \-o n
+specify output format (numeric value, see examples below).  Use -d with this option.
+.TP
+.B \-p
+output poles and zeros
+.TP
+.B \-q dir
+specify the output directory
+.TP
+.B \-Q qual
+specify data quality [E,D,M,Q,R] (See Input Options below for details)
+.TP
+.B \-R
+print response data
+.TP
+.B \-s
+retrieve all station header information
+.TP
+.B \-S
+retrieve station summary information
+.TP
+.B \-t
+show start/stop times, start blocks of events
+.TP
+.B \-u
+show usage (this list)
+.TP
+.B \-v n
+select volume number
+.TP
+.B \-x
+use summary file
+.TP
+.B \-z n 
+check for reversals and apply sign change correction based on the number n=[0-3] (see Check Reversal under Options section below)
+.\"                *=======================================*
+.\"================|         Command description           |===================
+.\"                *=======================================*
+.SH DESCRIPTION
+rdseed reads and interprets Standard for Exchange of Earthquake Data (SEED) files.  This is the format defined by the Federation of Digital Seismographic Networks (FDSN) to represent seismic data.  According to the command line function option specified by the user, rdseed will read the volume and recover the volume table of contents (-c option), the set of abbreviation dictionaries (-a option), or station and channel information and instrument response tables (-s option).
+ 
+The desired sequential volume in a file or on tape can be selected with the (-v option). The first volume is "1", the second "2" and so forth.  Note: this option only applies to physical volumes that contain multiple logical volumes.
+ 
+Additional options allow access to detailed information concerning the actual contents of the volume.  The first of these options (-t) writes out a list of data start and stop times along with the starting record sequence numbers at which those data may be found.  The other option (-l) is primarily a diagnostic tool; it writes a description of every record in the volume.
+ 
+While there are a large number of command line options for rdseed, the user can also run it in "User Prompt Mode", discussed below. 
+
+As data is extracted from the SEED volume, rdseed looks at the orientation and sensitivity of each channel to determine if the channel polarity is reversed. Refer to the description of blockettes 52 and 58 in the SEED manual for a description of reversed polarity. A negative sensitivity in blockette 58 is indicative of a reversed polarity. The user can request that reversed channels be corrected (-z option). This correction is a simple multiplication by -1.0 to the data samples for that specific channel.  The output response file information is NOT adjusted for channels where rdseed inverts the data.
+ 
+.SH Output Header Corrections
+rdseed corrects the header information in the SAC, AH and CSS files as follows:
+
+SAC headers contain dip and azimuth information.  If a dip/azimuth reversal checking is active (-z option 1) and detected, rdseed will reverse the sign of the data samples and the dip and azimuth values.  If gain reversal checking is active (-z option 2) and detected, then rdseed will reverse the sign of the data samples (no header information is altered).  If both dip/azimuth and gain reversals are being checked for (-z option 3), correction is only performed if one or the other is found to be reversed.  Otherwise nothing is altered.
+
+CSS headers are handled in the same way as SAC headers, except that a scale factor is inserted into the CALIB variable.  If gain reversal checking is active and a reversal is found, the data are inverted and the header CALIB value is also inverted.
+
+AH headers have no dedicated place to store dip/azimuth information, but do have a comment field where this information is added.  The same rules as above are followed for reversal checking options 1, 2, and 3, otherwise.
+
+.SH User Prompt Mode
+When rdseed is run without any options, the user is prompted for each option, along with additional options described below.
+ 
+.SH Input Options
+[command line equivalent in brackets]
+.TP
+.B Input Device (/dev/nrst0): 
+[-f] the input device can be changed from the default of /dev/nrst0, which refers to a magnetic tape device.  Note that when a tape is being accessed, it is best to use the no-rewind device. This allows rdseed to search for multiple volumes on tape across tape file marks. 
+.TP
+.B Output Device (stdout): 
+non-error text displayed by rdseed goes to the terminal by default, but can be redirected to a file that you indicate here.  Some of the options send results to the Output Device (such as the station summary [-S]). Use the Unix '>' redirect command when calling rdseed from the command line.
+.TP
+.B Volume # [(1)-N]: 
+[-v] the volume number can be changed from the default value of 1. 
+.TP
+.B Options [various]: 
+one mode option must be selected, the complete list of which is displayed by the program.  All options except the following have the same meaning as the corresponding command line options listed above, with the following exceptions: 
+.TP
+		* the "e" option will generate a "weed" compatible event file.
+.TP
+		* the "d" option means the user wants to output a data file, the type of which is designated by the Output Format option shown below.
+
+One or more of the following options will be presented to the user if the "d","s", or "S" option was selected:
+.TP
+.B Summary File (None): 
+[-x] a summary file can be selected as input for rdseed to filter stations, channels, and time windows. Created by JWEED , a summary file lists events, and phase oriented time windows for station data.  See the JWEED online manual for more information.
+.TP
+.B Station List (ALL) : 
+a list of selected stations separated by spaces or commas. Wildcard substitution using characters "*" , "?" and "." is allowed.  A station name can be an alias whose name is defined in a file whose filename is specified by the environment variable SEEDALIAS.  (See details below.)
+Hitting RETURN accepts all stations.
+.TP
+.B Channel List (ALL) : 
+a list of selected channels separated by spaces or commas. Wildcard substitution using characters "*" ,"?" and "." is allowed.   Hitting RETURN accepts all channels.
+.TP
+.B Network List (ALL) : 
+a list of selected networks separated by spaces or commas.   Hitting RETURN accepts all networks.
+.TP
+.B Loc Ids (ALL ["--" for spaces]) :
+a list of location identifiers (two alpha-numeric characters) that encapsulate a set of related channels.  Originally, SEED left the IDs undefined with space characters, so some dasta may be identified with spaces only.  Hitting RETURN accepts all location IDs.  Option -i from the command line tells rdseed to ignore location codes.
+.TP
+.B Output Format [(1)..9]: 
+[-d -o] select output format as one of the following:
+.br
+	1=SAC - (default) SAC binary format
+.br
+	2=AH - AH (Ad Hoc) format
+.br
+	3=CSS - CSS Schema format
+.br
+	4=miniSEED - data-only SEED records
+.br
+	5=SEED - full SEED with metadata
+.br
+	6=SAC ALPHA - SAC alphanumeric (ASCII) format
+.br
+	7=SEGY - SEG-Y format
+.br
+	8=Simple ASCII (SLIST) - Single column sample values in ASCII
+.br
+	9=Simple ASCII (TSPAIR) - Time and sample column pairs in ASCII
+.TP
+.B Output file names include endtime? [Y/(n)]:
+[-E] select if the user wants each output file to be tagged with the waveform end time in the file name. 
+.TP
+.B Output poles and zeroes?[Y/(n)]: 
+[-p] select if the user wants a SAC PZ (poles and zeros) file to be created.
+SAC PZ files contain header annotation that identifies key metadata features about the station being described. (See example of SAC PZ format below).
+.TP
+.B Check Reversal [0..3]
+    0=No (default)
+    1=Dip.Azimuth
+    2=Gain
+    3=Both: 
+[-z] select signal reversal check and data change on dip/azimuth, gain, or both.  (See Output Header Corrections above for details)
+.TP
+.B Start Time(s) (FIRST) : 
+a list of seismogram start times of the form YYYY.DDD.HH:MM:SS.FFFF or YYYY/MM/DD.HH:MM:SS.FFFF separated by spaces. YYYY may be YY i.e. "90" for "1990".  Least significant parts may be omitted, in which case they become zero i.e. "90.270" is time 00:00:00.0000 of the 270th day of 1990. 
+.TP
+.B End Time(s) (LAST) : 
+a list of seismogram end times of the same form as start times. Each start time (except the last one) must have a corresponding end time. If the last start time does not have a corresponding end time, the end time is assumed to be the last time in the volume. 
+.TP
+.B Sample Buffer Length [2000000]: 
+[-b] each seismogram is assembled in a sample buffer prior to output. The size of the buffer can be changed. This number is the number of samples (not bytes). If the length is too small for the any of the requested seismograms, an error message will inform the user that the waveform is being broken into pieces.  The user may increase the size of the buffer to avoid this problem. 
+.TP
+.B Extract Responses [Y/(N)] : 
+[-R] get channel response information in RESP format.  (See example of RESP format below) 
+.TP
+.B Select Data Type [(E=Everything), D=Data of Undetermined state, M=Merged Data, R=Raw waveform Data, Q=QC'd data] 
+[-Q] filter the data based on the quality code.  The default behavior is to accept all quality codes.
+ 
+.SH Alternate Response Files and the Use of miniSEED Volumes
+The user can specify that station configuration and responses be taken from another SEED volume identified using either the -g command line option or setting the  ALT_RESPONSE_FILE environment variable to the name of the file.  This can be a SEED volume complete with data or one with only station metadata, called a dataless SEED.  Then rdseed can be run as normal with a SEED or miniSEED input file.  The station metadata used will be pulled from the specified alternate SEED file.  See the EXAMPLES section below for example usage.
+ 
+.SH The Alias File
+An alias file can be created which contains a list of station alias names. The first word in each line of the file is the alias. The words that follow are station names which will match the corresponding alias. The alias file name must be defined in the SEEDALIAS environment variable. For example, the file rdseed.alias contains the following:
+
+.TP
+.B CHINA BJI XIAN SHNG
+
+All references to the term 'CHINA' will match station BJI, XIAN or SHNG.
+
+.TP
+.B MY_IU FURI MAJO KIEV ANMO
+
+Would refer to the stations FURI, MAJO, KIEV, and ANMO when the term 'MY_IU' was listed as a station name.
+
+.SH Time Tear Tolerance
+Normally, the tolerance for determining time tears is found in the station header information (max clock drift in Blockette 52).  Some stations may have clocks that wander excessively, which may cause time tears in the data.  The drift tolerance can be adjusted by defining an environment variable called SEEDTOLERANCE.  Its value is multiplied by the Blockette 52 max clock drift to get the tolerance in seconds.  Thus a value of 3.0 will increase the drift tolerance by a factor of three.   Clock Drift is defined in units of "seconds per sample" and is typically around .00005.
+ 
+.SH rdseed Alert message file
+When rdseed determines that data reversal is necessary and the user specifies that rdseed should reverse the data, rdseed creates a file with the data reversal information inside. This information includes the file name where the reversal was applied. When the user exits the program, a message is displayed reminding the user to look at this file.  This file is called rdseed.alert.log and is located in the startup directory.
+ 
+.SH rdseed error logging
+All rdseed error messages are logged to a file, called rdseed.error.log with the date.   This file is only created if an error is encountered.
+ 
+.SH Data Output from rdseed
+There are two necessary steps to recovering seismograms from a SEED file.
+ 
+The first step consists of finding out what is in the file.  The user can do this by using the command line options -c or -t, to list the station and channel names, starting times, and record numbers of the seismograms contained in the volume.
+ 
+Seismic data are recovered from SEED files in the second step. Using the station, channel and time information, use User Prompt Mode to select start and stop times for individual seismograms.
+ 
+Seismogram files are written to the current directory with names of the form:
+.br
+seed.rdseed for full SEED
+.br
+mini.seed for mini seed
+.br
+yyyy.ddd.hh.mm.ss.ffff.NN.SSSSS.LL.CCC.Q.SAC for SAC Files
+.br
+yyyy.ddd.hh.mm.ss.ffff.NN.SSSSS.LL.CCC.Q.AH for AH Files
+.br
+rdseed00000nnn.Q.w for CSS Files
+.br
+yyyy.ddd.hh.mm.ss.ffff.NN.SSSSS.LL.CCC.Q.SAC_ASC for sac ASCII
+.br
+yyyy.ddd.hh.mm.ss.ffff.NN.SSSSS.LL.CCC.Q.SEGY for SEGY
+.br
+yyyy.ddd.hh.mm.ss.ffff_NN.SSSS.LL.CCC.Q.ascii for columnar ASCII
+
+where 
+.br
+yyyy is the year, 
+.br
+ddd is the Julian day, 
+.br
+hh.mm.ss.ffff is the time of day of the start of the first record, 
+.br
+NN is the network identifier
+.br
+SSSSS is the station name, 
+.br
+LL is the location ID
+.br
+CCC is the component name for the particular seismogram being recovered, and 
+.br
+Q is the quality control marker (M, Q, D, R).
+.br
+00000nnn is a sequence number
+
+This seismogram file naming convention was chosen to provide unique names to output files without user intervention; however, the large number of files which can be generated to a single directory might cause problems for some operating systems. Notice that CSS uses a slightly different format that puts channel data in subdirectories. This is due to a limitation in the filename field in the CSS database. For CSS there are additional files created:
+
+.br
+rdseed.affiliation
+.br
+rdseed.network
+.br
+rdseed.site
+.br
+rdseed.sitechan
+.br
+rdseed.wfdisc
+.br
+ 
+Be aware that rdseed always appends onto the mini.seed file.  The user needs to manually remove this file in order to start over.
+
+.SH Metadata Output from rdseed
+
+The rdseed user can write out supporting files to data that contain information about the instrumentation.  This information can support the user's interpretation of the digital waveforms, which are subject to scaling and frequency response changes from the original ground motion readings at the point it is recorded at the digitizer.
+
+.B SAC Poles and Zeroes (SAC PZ) file
+
+If the user indicated that they wanted to get the poles and zeroes with their SAC output (see Input Options above) or selected the '-p' option on the command line, a separate text file with an annotated header is provided.  An important fact to note about the SAC PZ output is that acceleration and velocity responses are converted to displacement to conform to the SAC convention.  However, we conform to the SEED convention of displacement in meters rather than the SAC convention of displacement in nanometers. The example below is created by rdseed 5.2 and later and is compatible with SAC v101.4 and later.
+
+.br
+********************************** 
+.br
+* NETWORK   (KNETWK): II 
+.br
+* STATION    (KSTNM): PFO 
+.br
+* LOCATION   (KHOLE): 00 
+.br
+* CHANNEL   (KCMPNM): BHZ 
+.br
+* CREATED           : 2011-08-12T21:51:26 
+.br
+* START             : 2010-07-30T18:50:00 
+.br
+* END               : 2599-12-31T23:59:59 
+.br
+* DESCRIPTION       : Pinon Flat, California, USA 
+.br
+* LATITUDE          : 33.610700 
+.br
+* LONGITUDE         : -116.455500 
+.br
+* ELEVATION         : 1280.0 
+.br
+* DEPTH             : 5.3 
+.br
+* DIP               : 0.0 
+.br
+* AZIMUTH           : 0.0 
+.br
+* SAMPLE RATE       : 20.0 
+.br
+* INPUT UNIT        : M 
+.br
+* OUTPUT UNIT       : COUNTS 
+.br
+* INSTTYPE          : Streckeisen STS-1 Seismometer with Metrozet E300 
+.br
+* INSTGAIN          : 3.314400e+03 (M/S) 
+.br
+* COMMENT           : S/N #119005 
+.br
+* SENSITIVITY       : 5.247780e+09 (M/S) 
+.br
+* A0                : 7.273290e+01 
+.br
+* ********************************** 
+.br
+ZEROS	6
+.br
+ 	+0.000000e+00	+0.000000e+00
+.br
+ 	+0.000000e+00	+0.000000e+00
+.br
+ 	+0.000000e+00	+0.000000e+00	 
+.br
+	-7.853982e+01	+0.000000e+00	 
+.br
+	-1.525042e-01	+0.000000e+00	 
+.br
+	-1.525042e-01	+0.000000e+00	 
+.br
+POLES	6 
+.br
+	-1.207063e-02	+1.224561e-02	 
+.br
+	-1.207063e-02	-1.224561e-02	 
+.br
+	-1.522510e-01	+9.643684e-03	 
+.br
+	-1.522510e-01	-9.643684e-03	 
+.br
+	-4.832398e+01	+5.817080e+01	 
+.br
+	-4.832398e+01	-5.817080e+01	 
+.br
+CONSTANT	3.816863e+11
+
+
+.B SEED RESP file
+
+The RESP file has been present for rdseed users for a long time, and very little has changed with the format over the years.  It is a fairly complete instrument response representation, complete with blockette annotations, presented in an easy to read ASCII format.  The example shown represents just a portion of what is otherwise a lengthy representation.
+
+Users get the RESP file when they respond 'Y' to Extract Responses (see Input Options above) or the command line option '-R'.
+
+.br
+B050F03     Station:     PFO
+.br
+B050F16     Network:     II
+.br
+B052F03     Location:    00
+.br
+B052F04     Channel:     BHZ
+.br
+B052F22     Start date:  2010,211,18:50:00
+.br
+B052F23     End date:    2599,365,23:59:59
+.br
+#
+.br
+#                  +-----------------------------------+
+.br
+#                  |    Response (Poles and Zeros)     |
+.br
+#                  |        II  PFO    00  BHZ         |
+.br
+#                  |     07/30/2010 to 12/31/2599      |
+.br
+#                  +-----------------------------------+
+.br
+#
+.br
+B053F03     Transfer function type:                B
+.br
+B053F04     Stage sequence number:                 1
+.br
+B053F05     Response in units lookup:              M/S - Velocity in Meters Per Second
+.br
+B053F06     Response out units lookup:             V - Volts
+.br
+B053F07     A0 normalization factor:               +1.15758E+01
+.br
+B053F08     Normalization frequency:               +5.00000E-02
+.br
+B053F09     Number of zeroes:                      5
+.br
+B053F14     Number of poles:                       6
+.br
+#              Complex zeroes:
+.br
+#              i  real          imag          real_error    imag_error
+.br
+B053F10-13     0  +0.00000E+00  +0.00000E+00  +0.00000E+00  +0.00000E+00
+.br
+B053F10-13     1  +0.00000E+00  +0.00000E+00  +0.00000E+00  +0.00000E+00
+.br
+B053F10-13     2  -1.25000E+01  +0.00000E+00  +0.00000E+00  +0.00000E+00
+.br
+B053F10-13     3  -2.42718E-02  +0.00000E+00  +0.00000E+00  +0.00000E+00
+.br
+B053F10-13     4  -2.42718E-02  +0.00000E+00  +0.00000E+00  +0.00000E+00
+.br
+#              Complex poles:
+.br
+#              i  real          imag          real_error    imag_error
+.br
+B053F15-18     0  -1.92110E-03  +1.94895E-03  +0.00000E+00  +0.00000E+00
+.br
+B053F15-18     1  -1.92110E-03  -1.94895E-03  +0.00000E+00  +0.00000E+00
+.br
+B053F15-18     2  -2.42315E-02  +1.53484E-03  +0.00000E+00  +0.00000E+00
+.br
+B053F15-18     3  -2.42315E-02  -1.53484E-03  +0.00000E+00  +0.00000E+00
+.br
+B053F15-18     4  -7.69100E+00  +9.25817E+00  +0.00000E+00  +0.00000E+00
+.br
+B053F15-18     5  -7.69100E+00  -9.25817E+00  +0.00000E+00  +0.00000E+00
+.br
+#
+.br
+#                  +-----------------------------------+
+.br
+#                  |      Channel Sensitivity/Gain     |
+.br
+#                  |        II  PFO    00  BHZ         |
+.br
+#                  |     07/30/2010 to 12/31/2599      |
+.br
+#                  +-----------------------------------+
+.br
+#
+.br
+B058F03     Stage sequence number:                 1
+.br
+B058F04     Sensitivity:                           +3.31440E+03
+.br
+B058F05     Frequency of sensitivity:              +5.00000E-02
+.br
+B058F06     Number of calibrations:                0
+.br
+
+
+.SH Recovering auxiliary data from a SEED Volume
+One may also retrieve the set of abbreviation dictionaries or the set of station information tables from an FDSN SEED volume. 
+ 
+Abbreviation dictionaries are retrieved with the command
+.br
+rdseed -af inputfile
+
+Station information tables are accessed with
+.br
+rdseed -sf inputfile
+ 
+.SH DIAGNOSTICS 
+Various warnings and error messages are issued to the standard error device (stderr) by the procedure. Typical response of the procedure to a warning condition is to write a message to the standard error device and then to continue execution. An error condition, on the other hand, will cause a message to be generated to the standard error device followed by immediate termination of the procedure.
+ 
+.SH EXAMPLES 
+
+.TP
+.B 1. Reading the table of contents from a volume on tape.
+.br
+% rdseed -cf /dev/rmt8 > tape.contents
+
+.br
+or 
+
+.br
+% rdseed
+.br
+Input Device (/dev/rst0) : /dev/rmt8
+.br
+Output Device (stdout) : tape.contents
+.br
+Volume # [(1)-N] :
+.br
+Options [acsSrRtde] : c
+
+reads the table of contents from the tape on device /dev/rmt8 into a file called tape.contents.  The result is formatted ASCII that lists volume information, the time spans for data, and any hypocenter information that may be present.
+
+The user can do the same thing reading from a disk file.  Just replace /dev/rmt8 with the file name.
+
+.TP
+.B 2. Determining event start/stop times on a SEED file.
+.br
+% rdseed -tvf 2 myFile.seed > myFile.times
+
+.br
+or
+
+.br
+% rdseed
+.br
+Input Device (/dev/rst0) : myFile.seed
+.br
+Output Device (stdout) : myFile.times
+.br
+Volume # [(1)-N] : 2
+.br
+Options [acsSrRtde] : t
+
+reads a disk file called myFile.seed and creates a table containing starting record numbers, station and channel names, start and stop times of events, nominal sample rate, calculated sample rate and numbers of samples for that file. Output is written to the file myFile.times.
+
+.TP
+.B 3. Creating a detailed list of the contents of a SEED file:
+.br
+% rdseed -lf myFile.seed > tape.list &
+
+reads the file myFile.seed and writes a list of the contents of each record to a file called tape.list.  This job is run in the background by using an ampersand on the end.
+
+.TP
+.B 4. Reading all data from a tape.
+.br
+% rdseed 
+.br
+Input Device (/dev/rst0): /dev/rmt8 
+.br
+Output Device (stdout): tape.extraction.list 
+.br
+Volume # [(1)-N]: 
+.br
+Options [acsSrRtde]: d 
+.br
+Station List (ALL): 
+.br
+Channel List (ALL): 
+.br
+Loc Ids (ALL ["--" for spaces]):
+.br
+Output format [(1-SAC),2-AH...]: 
+.br
+Start Time(s) (FIRST) : 
+.br
+End Time(s) (LAST): 
+.br
+Sample Buffer Length [2000000]: 
+.br
+Extract Responses [Y/(N)]: 
+
+reads all seismograms from the tape on device /dev/rmt8 into the current directory (defaults to SAC format) and writes informational output to a file called tape.extraction.list.
+
+.TP
+.B 5. Reading the abbreviation dictionaries.
+.br
+% rdseed -af myFile.seed > abbreviations.txt
+
+.br
+or 
+
+.br
+% rdseed 
+.br
+Input Device (/dev/rst0): myFile.seed 
+.br
+Output Device (stdout): abbreviations.txt 
+.br
+Volume # [(1)-N]: 1 
+.br
+Options [acsSrRtde]: a 
+
+extracts the abbreviation dictionaries from a SEED file and sends the result to a text file.
+
+.TP
+.B 6. Reading station information.
+.br
+% rdseed -sf /dev/rmt8 > tape.station.information
+
+.br
+or 
+
+.br
+% rdseed 
+.br
+Input Device (/dev/rst0): /dev/rmt8 
+.br
+Output Device (stdout): tape.station.information 
+.br
+Volume # [(1)-N]: 1 
+.br
+Options [acsSrRtde]: s 
+
+recovers station and channel location and response information from the tape on device /dev/rmt8 and writes the information to a file.
+
+.TP
+.B 7. Reading specific station/channel/time information.
+.br
+% rdseed 
+.br
+Input Device (/dev/rst0) : /export/home/myFile.seed 
+.br
+Output Device (stdout) : 
+.br
+Volume # [(1)-N] :
+.br
+Options [acsSrRtde] : d 
+.br
+Summary File (None) : 
+.br
+Station List (ALL) : BJI YKW1 
+.br
+Channel List (ALL) : *Z 
+.br
+Network List (ALL) : 
+.br
+Loc Ids (ALL ["--" for spaces]):
+.br
+Output format [(1-SAC),2-AH..]: 
+.br
+Start Time(s) (FIRST) : 1990,270,20:30 
+.br
+End Time(s) (LAST) : 1991/2/1 
+.br
+Sample Buffer Length [2000000]: 3000000 
+.br
+Extract Responses [Y/(N)] : Y 
+
+reads all seismograms from a SEED file for stations BJI and YKW1, all Z channels, from year 1900, Julian day 270, hour 20, minute 30 to February 1, 1991. The buffer size was increased to 3 million samples and the channel response information will be output.
+
+.TP
+.B 8. Using another SEED volume for metadata, a combination of miniSEED and dataless.
+.br
+% rdseed -d -o 1 -f mydata.miniseed -g mymetadata.dataless
+
+writes binary SAC files for the provided miniSEED data using the provided dataless SEED volume as metadata.  Note that the -d and -o options are used together to indicate the data output format.  The equivalent action through the interactive mode is shown here:
+
+% setenv ALT_RESPONSE_FILE mymetadata.dataless
+.br
+% rdseed 
+.br
+Input Device (/dev/rst0) : mydata.miniseed
+.br
+Output Device (stdout) : 
+.br
+Volume # [(1)-N] : 
+.br
+Options [acsSrRtde] : d 
+.br
+Summary File (None) : 
+.br
+Station List (ALL) :
+.br
+Channel List (ALL) :
+.br
+Network List (ALL) : 
+.br
+Loc Ids (ALL ["--" for spaces]):
+.br
+Output format [(1-SAC),2-AH..]: 1
+.br
+Start Time(s) (FIRST) : 
+.br
+End Time(s) (LAST) :
+.br
+Sample Buffer Length [2000000]:
+.br
+Extract Responses [Y/(N)] :
+
+.SH ENVIRONMENT VARIABLES
+
+.B SEEDALIAS
+Indicates a file name that lists station group aliases (see above).
+
+.B ALT_RESPONSE_FILE
+Indicates a SEED dataless file that contains station metadata that corresponds to the data Input File read by rdseed, this is an alternative to using the -g command line option.
+
+.B SEEDTOLERANCE
+The multiplier for the clock drift to determine the maximum acceptable time gap in the data to still be treated as a continuous data stream.
+
+To set environment variable values:
+.br
+	in csh:	% setenv ALT_RESPONSE_FILE myDataless.seed
+
+.br
+	in sh or bash:	$ ALT_RESPONSE_FILE=myDataless.seed
+.br
+			$ export ALT_RESPONSE_FILE 
+
+
+.SH CHANGES
+.TP
+.B Version 5.1 - August 2011
+.br
+* Support for Windows PC using CYGWIN (http://www.cygwin.com/)
+.br
+* Support for 2 simple ASCII text file formats
+.br
+* Now supports double precision floating point data
+.br
+* miniSEED output as doubles has been added
+.br
+* Enhanced SAC PZ file header annotations, in addition to the annotations included by rdseed version 5.0 the following values have been added:
+.br
+		- Sample rate
+.br
+		- Instrument type
+.br
+		- Instrument gain
+.br
+		- Sensitivity
+.br
+		- A0 (normalization factor for poles and zeros)
+.br
+* Summary file processing was upgraded to better support the M quality data
+.br
+* Error logging is in one file.  Only logs when an error happened
+.br
+* The SAC header variable SCALE is no longer populated
+.br
+* The SAC header variable EVDP, for event depth, is now in units of kilometers, in previous releases this value was in meters.
+

@@ -1,0 +1,57 @@
+CC=cc
+all : pagetop.o \
+print_abrvd.o \
+print_channel.o \
+print_response.o \
+print_stnh.o \
+print_timeh.o \
+print_key.o \
+print_10.o \
+print_11.o \
+print_12.o \
+print_30.o \
+print_31.o \
+print_32.o \
+print_33.o \
+print_34.o \
+print_35.o \
+print_41.o \
+print_42.o \
+print_43.o \
+print_44.o \
+print_45.o \
+print_46.o \
+print_47.o \
+print_48.o \
+print_50.o \
+print_51.o \
+print_52.o \
+print_53.o \
+print_54.o \
+print_55.o \
+print_56.o \
+print_57.o \
+print_58.o \
+print_59.o \
+print_60.o \
+print_61.o \
+print_62.o \
+print_70.o \
+print_71.o \
+print_72.o \
+print_73.o \
+print_74.o \
+find_30.o\
+find_31.o \
+find_32.o \
+find_33.o \
+find_34.o \
+find_41.o \
+find_42.o \
+find_43.o \
+find_44.o \
+find_45.o \
+find_46.o \
+find_47.o \
+find_48.o \
+print_volh.o

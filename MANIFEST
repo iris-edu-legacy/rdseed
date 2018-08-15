@@ -1,0 +1,78 @@
+
+Sources:
+
+	Program's main() is found in Main/rdseed.c
+
+	Main/
+		ah_resp.c                  output_ah.c          output_resp.c              rdseed.c
+		alt_response.c             output_b2k.c         output_sac.c               steim.c
+		atc.c                      output_css.c         output_seed.c              summary.c
+		makefile                   output_data.c        output_segy.c              time_span_out.c
+		output_event_info.c        output_simple.c 	output_LOG.c               output_mini.c              
+		output_stn_chn_comments.c
+
+	Ah/
+		ioroutin.c  makefile
+	
+	Decoders/
+		convert_seedhdr.c         decode_dwwssn.c           decode_rstn.c             init_data_hdr.c
+		decode_16bit.c            decode_echery.c           decode_sro.c              makefile
+		decode_32bit.c            decode_geoscope.c         decode_steim.c            process_data.c
+		decode_asro.c             decode_graef.c            decode_steim2.c           process_event_requests.c
+		decode_cdsn.c             decode_ieeedouble.c       decode_usnsn.c            process_time_span.c
+		decode_ddl.c              decode_ieeefloat.c        get_response.c
+
+	Include/
+		ahhead.h      macros.h      rdseed.h      sac.h         steim.h       version.h
+		ddl.h         patchlevel.h  resp_defs.h   segy.h        structures.h
+
+	Man/
+		rdseed.1
+
+	Parsers/
+		free_11.c   free_44.c        free_57.c    free_response.c  parse_34.c       parse_52.c       parse_71.c
+		free_12.c   free_45.c        free_58.c    get_response.c   parse_35.c       parse_53.c       parse_72.c
+		free_2k.c   free_46.c        free_59.c    makefile         parse_41.c       parse_54.c       parse_73.c
+		free_30.c   free_47.c        free_60.c    parse_10.c       parse_42.c       parse_55.c       parse_74.c
+		free_31.c   free_48.c        free_61.c    parse_100.c      parse_43.c       parse_56.c       parse_key.c
+		free_32.c   free_50.c        free_62.c    parse_11.c       parse_44.c       parse_57.c       prc_abrvd.c
+		free_33.c   free_51.c        free_70.c    parse_12.c       parse_45.c       parse_58.c       prc_blank.c
+		free_34.c   free_52.c        free_71.c    parse_2k.c       parse_46.c       parse_59.c       prc_stnh.c
+		free_35.c   free_53.c        free_72.c    parse_30.c       parse_47.c       parse_60.c       prc_timeh.c
+		free_41.c   free_54.c        free_73.c    parse_31.c       parse_48.c       parse_61.c       prc_volh.c
+		free_42.c   free_55.c        free_74.c    parse_32.c       parse_50.c       parse_62.c
+		free_43.c   free_56.c        free_all.c   parse_33.c       parse_51.c       parse_70.c
+
+	Printers/
+		find_30.c   find_45.c   print_30.c        print_44.c    print_54.c        print_70.c        print_stnh.c
+		find_31.c   find_46.c   print_31.c        print_45.c    print_55.c        print_71.c        print_timeh.c
+		find_32.c   find_47.c   print_32.c        print_46.c    print_56.c        print_72.c        print_volh.c
+		find_33.c   find_48.c   print_33.c        print_47.c    print_57.c        print_73.c
+		find_34.c   makefile    print_34.c        print_48.c    print_58.c        print_74.c
+		find_41.c   pagetop.c   print_35.c        print_50.c    print_59.c        print_abrvd.c
+		find_42.c   print_10.c  print_41.c        print_51.c    print_60.c        print_channel.c
+		find_43.c   print_11.c  print_42.c        print_52.c    print_61.c        print_key.c
+		find_44.c   print_12.c  print_43.c        print_53.c    print_62.c        print_response.c
+
+	Snoop/
+		makefile
+		times_data.c
+
+	Utilities/
+		alloc_linklist_element.c  memncpy.c                 split.c                   timecvt.c
+		allocation_error.c        parse_double.c            strlst.c                  timedif.c
+		cmdlineproc.c             parse_int.c               swap_2byte.c              timepch.c
+		delaz.c                   parse_long.c              swap_4byte.c              timeprt.c
+		find_wordorder.c          parse_nchar.c             timeadd.c                 timeqc.c
+		get_date.c                parse_varlstr.c           timeadd_double.c          timetol.c
+		log_errors.c              read_blockette.c          timeaddphase.c
+		makefile                  read_logical_record.c     timecmp.c
+		
+		
+rdseedv5.2 :
+	CHANGES
+	MANIFEST
+	README
+	Distribution.date
+	rdseed_manual.pdf
+	Makefile
