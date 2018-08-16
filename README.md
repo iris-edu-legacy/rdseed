@@ -505,11 +505,11 @@ Extract Responses [Y/(N)] :
 
 ### ENVIRONMENT VARIABLES
 
-table(table table-bordered table-striped).
-|_. Variable|_. Desciption|
-|SEEDALIAS|Indicates a file name that lists station group aliases (see above).|
-|ALT_RESPONSE_FILE|Indicates a SEED dataless file that contains station metadata that corresponds to the data Input File read by @rdseed@, this is an alternative to using the @-g@ command line option.|
-|SEEDTOLERANCE|The multiplier for the clock drift to determine the maximum acceptable time gap in the data to still be treated as a continuous data stream.|
+| Variable      | Description   |
+| -------------:|:--------------|
+| SEEDALIAS      | Indicates a file name that lists station group aliases (see above). |
+| ALT_RESPONSE_FILE      | Indicates a SEED dataless file that contains station metadata that corresponds to the data Input File read by `rdseed`, this is an alternative to using the `-g` command line option.      |
+| SEEDTOLERANCE | The multiplier for the clock drift to determine the maximum acceptable time gap in the data to still be treated as a continuous data stream.      |
 
 To set environment variable values in csh:
 
