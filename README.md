@@ -93,7 +93,7 @@ One or more of the following options will be presented to the user if the `d`, `
 
 ##### Summary File (Default: None):
 
-`[-x]` a summary file can be selected as input for `rdseed` to filter stations, channels, and time windows.  Created by "JWEED", a summary file lists events, and phase oriented time windows for station data.  **NOTE:***  _JWEED has been replaced by PyWEED._
+`[-x]` a summary file can be selected as input for `rdseed` to filter stations, channels, and time windows.  Created by "JWEED", a summary file lists events, and phase oriented time windows for station data.  **NOTE:**  _JWEED has been replaced by PyWEED._
 
 ##### Station List (ALL) :
 
@@ -132,7 +132,7 @@ A list of location identifiers (two alpha-numeric characters) that encapsulate a
 
 ##### Output poles and zeroes?[Y/(n)]:
 
-`[-p]` select if the user wants a SAC PZ (poles and zeros) file to be created. SAC PZ files contain header annotation that identifies key metadata features about the station being described. (See ["example of SAC PZ format below"](./README.md/#sacpz)).
+`[-p]` select if the user wants a SAC PZ (poles and zeros) file to be created. SAC PZ files contain header annotation that identifies key metadata features about the station being described. (See ["example of SAC PZ format below"](./README.md#sac-poles-and-zeroes-sac-pz-file)).
 
 ##### Check Reversal [0..3]
 
@@ -172,7 +172,7 @@ The user can specify that station configuration and responses be taken from anot
 
 You can specify multiple file names by separating each name by a colon `':'` character.
 
-See the ["EXAMPLES"](./README.md/#examples) section below for example usage.
+See the ["EXAMPLES"](./README.md/#8-using-another-seed-volume-for-metadata-a-combination-of-miniseed-and-dataless) section below for example usage.
 
 #### The Alias File
 
@@ -251,7 +251,7 @@ The `rdseed` user can write out supporting files to data that contain informatio
 
 ##### SAC Poles and Zeroes (SAC PZ) file
 
-If the user indicated that they wanted to get the poles and zeroes with their SAC output (see ["Input Options"](./README.md/#input-opts) above) or selected the `-p` option on the command line, a separate text file with an annotated header is provided.  An important fact to note about the SAC PZ output is that acceleration and velocity responses are converted to displacement to conform to the SAC convention.  The example below is created by `rdseed 5.1` and later and is compatible with `SAC v101.4` and later.
+If the user indicated that they wanted to get the poles and zeroes with their SAC output (see ["Input Options"](./README.md/#options) above) or selected the `-p` option on the command line, a separate text file with an annotated header is provided.  An important fact to note about the SAC PZ output is that acceleration and velocity responses are converted to displacement to conform to the SAC convention.  The example below is created by `rdseed 5.1` and later and is compatible with `SAC v101.4` and later.
 
 ```
 **********************************
@@ -297,7 +297,7 @@ CONSTANT    3.816863e+11
 
 ##### SEED RESP file
 
-The RESP file has been present for `rdseed` users for a long time, and very little has changed with the format over the years.  It is a fairly complete instrument response representation, complete with blockette annotations, presented in an easy to read ASCII format.  The example shown represents just a portion of what is otherwise a lengthy representation. Users get the RESP file when they respond 'Y' to Extract Responses (see ["Input Options"](./README.md/#input-opts) above) or the command line option `-R`.
+The RESP file has been present for `rdseed` users for a long time, and very little has changed with the format over the years.  It is a fairly complete instrument response representation, complete with blockette annotations, presented in an easy to read ASCII format.  The example shown represents just a portion of what is otherwise a lengthy representation. Users get the RESP file when they respond 'Y' to Extract Responses (see ["Input Options"](./README.md/#options) above) or the command line option `-R`.
 
 ```
 B050F03     Station:     PFO
