@@ -251,7 +251,7 @@ The `rdseed` user can write out supporting files to data that contain informatio
 
 ##### SAC Poles and Zeroes (SAC PZ) file
 
-If the user indicated that they wanted to get the poles and zeroes with their SAC output (see ["Input Options"](./README.md/#options) above) or selected the `-p` option on the command line, a separate text file with an annotated header is provided.  An important fact to note about the SAC PZ output is that acceleration and velocity responses are converted to displacement to conform to the SAC convention.  The example below is created by `rdseed 5.1` and later and is compatible with `SAC v101.4` and later.
+If the user indicated that they wanted to get the poles and zeroes with their SAC output (see ["Input Options"](./README.md/#input-options) above) or selected the `-p` option on the command line, a separate text file with an annotated header is provided.  An important fact to note about the SAC PZ output is that acceleration and velocity responses are converted to displacement to conform to the SAC convention.  The example below is created by `rdseed 5.1` and later and is compatible with `SAC v101.4` and later.
 
 ```
 **********************************
@@ -297,7 +297,7 @@ CONSTANT    3.816863e+11
 
 ##### SEED RESP file
 
-The RESP file has been present for `rdseed` users for a long time, and very little has changed with the format over the years.  It is a fairly complete instrument response representation, complete with blockette annotations, presented in an easy to read ASCII format.  The example shown represents just a portion of what is otherwise a lengthy representation. Users get the RESP file when they respond 'Y' to Extract Responses (see ["Input Options"](./README.md/#options) above) or the command line option `-R`.
+The RESP file has been present for `rdseed` users for a long time, and very little has changed with the format over the years.  It is a fairly complete instrument response representation, complete with blockette annotations, presented in an easy to read ASCII format.  The example shown represents just a portion of what is otherwise a lengthy representation. Users get the RESP file when they respond 'Y' to Extract Responses (see ["Input Options"](./README.md/#input-options) above) or the command line option `-R`.
 
 ```
 B050F03     Station:     PFO
