@@ -128,69 +128,71 @@ A list of location identifiers (two alpha-numeric characters) that encapsulate a
 
 ##### Output file names include endtime? [Y/(n)]
 
-@[-E]@ select if the user wants each output file to be tagged with the waveform end time in the file name.
+`[-E]` select if the user wants each output file to be tagged with the waveform end time in the file name.
 
-h4. Output poles and zeroes?[Y/(n)]:
+##### Output poles and zeroes?[Y/(n)]:
 
-@[-p]@ select if the user wants a SAC PZ (poles and zeros) file to be created. SAC PZ files contain header annotation that identifies key metadata features about the station being described. (See "example of SAC PZ format below":#sacpz).
+`[-p]` select if the user wants a SAC PZ (poles and zeros) file to be created. SAC PZ files contain header annotation that identifies key metadata features about the station being described. (See ["example of SAC PZ format below"](./README.md/#sacpz)).
 
-h4. Check Reversal [0..3]
+##### Check Reversal [0..3]
 
-pre. 0=No (default)
+```
+0=No (default)
 1=Dip.Azimuth
 2=Gain
 3=Both:
   [-z] select signal reversal check and data change on dip/azimuth, gain, or both.
+```
 
-(See "Output Header Corrections":#output-header-corrections above for details)
+(See ["Output Header Corrections"](./README.md/#output-header-corrections above for details))
 
-h4. Start Time(s) (FIRST) :
+##### Start Time(s) (FIRST) :
 
-A list of seismogram start times of the form @YYYY.DDD.HH:MM:SS.FFFF@ or @YYYY/MM/DD.HH:MM:SS.FFFF@ separated by spaces. @YYYY@ may be @YY@ i.e. "90" for "1990".  Least significant parts may be omitted, in which case they become zero i.e. @90.270@ is time 00:00:00.0000 of the 270th day of 1990.
+A list of seismogram start times of the form `YYYY.DDD.HH:MM:SS.FFFF` or `YYYY/MM/DD.HH:MM:SS.FFFF` separated by spaces. `YYYY` may be `YY` i.e. "90" for "1990".  Least significant parts may be omitted, in which case they become zero i.e. `90.270` is time 00:00:00.0000 of the 270th day of 1990.
 
-h4. End Time(s) (LAST) :
+##### End Time(s) (LAST) :
 
 A list of seismogram end times of the same form as start times. Each start time (except the last one) must have a corresponding end time. If the last start time does not have a corresponding end time, the end time is assumed to be the last time in the volume.
 
-h4. Sample Buffer Length [2000000]:
+##### Sample Buffer Length [2000000]:
 
-@[-b]@ each seismogram is assembled in a sample buffer prior to output. The size of the buffer can be changed. This number is the number of samples (not bytes). If the length is too small for the any of the requested seismograms, an error message will inform the user that the waveform is being broken into pieces.  The user may increase the size of the buffer to avoid this problem.
+`[-b]` each seismogram is assembled in a sample buffer prior to output. The size of the buffer can be changed. This number is the number of samples (not bytes). If the length is too small for the any of the requested seismograms, an error message will inform the user that the waveform is being broken into pieces.  The user may increase the size of the buffer to avoid this problem.
 
-h4. Extract Responses [Y/(N)] :
+##### Extract Responses [Y/(N)] :
 
-@[-R]@ get channel response information in RESP format.  (See "example of RESP format below":#resp)
+`[-R]` get channel response information in RESP format.  (See ["example of RESP format below"](./README.md/#resp))
 
-h4. Select Data Type [(E=Everything), D=Data of Undetermined state, M=Merged Data, R=Raw waveform Data, Q=QC'd data]
+##### Select Data Type [(E=Everything), D=Data of Undetermined state, M=Merged Data, R=Raw waveform Data, Q=QC'd data]
 
-@[-Q]@ filter the data based on the quality code.  The default behavior is to accept all quality codes.
+`[-Q]` filter the data based on the quality code.  The default behavior is to accept all quality codes.
 
-h3(#alt-response-files). Alternate Response Files and the Use of miniSEED Volumes
+#### Alternate Response Files and the Use of miniSEED Volumes
 
-The user can specify that station configuration and responses be taken from another SEED file, identified using either the @-g@ command line option or setting the @ALT_RESPONSE_FILE@ environment variable to the name of the SEED file. This can be a SEED file complete with data or one with only station metadata, called a "dataless SEED":/dms/nodes/dmc/data/formats/dataless-seed file.  You can then run @rdseed@ with a SEED or miniSEED file as input.  The station metadata used will be pulled from the specified alternate SEED file.
+The user can specify that station configuration and responses be taken from another SEED file, identified using either the `-g` command line option or setting the `ALT_RESPONSE_FILE` environment variable to the name of the SEED file. This can be a SEED file complete with data or one with only station metadata, called a ["dataless SEED"](https://ds.iris.edu/dms/nodes/dmc/data/formats/dataless-seed) file.  You can then run `rdseed` with a SEED or miniSEED file as input.  The station metadata used will be pulled from the specified alternate SEED file.
 
-You can specify multiple file names by separating each name by a colon ':' character.
+You can specify multiple file names by separating each name by a colon `':'` character.
 
-See the "EXAMPLES":#examples section below for example usage.
+See the ["EXAMPLES"](./README.md/#examples) section below for example usage.
 
-h3. The Alias File
+#### The Alias File
 
-An alias file can be created which contains a list of station alias names. The first word in each line of the file is the alias. The words that follow are station names which will match the corresponding alias. The alias file name must be defined in the SEEDALIAS environment variable. For example, the file rdseed.alias contains the following:
+An alias file can be created which contains a list of station alias names. The first word in each line of the file is the alias. The words that follow are station names which will match the corresponding alias. The alias file name must be defined in the `SEEDALIAS` environment variable. For example, the file `rdseed.alias` contains the following:
 
-pre. CHINA BJI XIAN SHNG
+`CHINA BJI XIAN SHNG`
 
 All references to the term 'CHINA' will match station BJI, XIAN or SHNG.
 
-pre. MY_IU FURI MAJO KIEV ANMO
+`MY_IU FURI MAJO KIEV ANMO`
 
 Would refer to the stations FURI, MAJO, KIEV, and ANMO when the term 'MY_IU' was listed as a station name.
 
-h3. Time Tear Tolerance
+#### Time Tear Tolerance
 
-Normally, the tolerance for determining time tears is found in the station header information (max clock drift in Blockette 52).  Some stations may have clocks that wander excessively, which may cause time tears in the data.  The drift tolerance can be adjusted by defining an environment variable called @SEEDTOLERANCE@.  Its value is multiplied by the Blockette 52 max clock drift to get the tolerance in seconds.  Thus a value of 3.0 will increase the drift tolerance by a factor of three.   Clock Drift is defined in units of "seconds per sample" and is typically around .00005.
+Normally, the tolerance for determining time tears is found in the station header information (max clock drift in Blockette 52).  Some stations may have clocks that wander excessively, which may cause time tears in the data.  The drift tolerance can be adjusted by defining an environment variable called `SEEDTOLERANCE`.  Its value is multiplied by the Blockette 52 max clock drift to get the tolerance in seconds.  Thus a value of 3.0 will increase the drift tolerance by a factor of three.   Clock Drift is defined in units of "seconds per sample" and is typically around .00005.
 
-h3. _rdseed_ Alert message file
+#### _rdseed_ Alert message file
 
-When @rdseed@ determines that data reversal is necessary and the user specifies that @rdseed@ should reverse the data, @rdseed@ creates a file with the data reversal information inside. This information includes the file name where the reversal was applied. When the user exits the program, a message is displayed reminding the user to look at this file.  This file is called @rdseed.alert.log@ and is located in the startup directory.
+When `rdseed` determines that data reversal is necessary and the user specifies that `rdseed` should reverse the data, `rdseed` creates a file with the data reversal information inside. This information includes the file name where the reversal was applied. When the user exits the program, a message is displayed reminding the user to look at this file.  This file is called `rdseed.alert.log` and is located in the startup directory.
 
 h3. _rdseed_ error logging
 
