@@ -354,7 +354,7 @@ char *stn;
 
 	}
 
-	return;
+	return 0;
 
 }
 
@@ -393,7 +393,7 @@ char *chn;
 		ch = strtok(NULL, ",");
 	}
 
-        return;
+        return 0;
 
 }
 
@@ -437,7 +437,7 @@ char *loc;
 	/* replace dashes with spaces */
 	// SUBSTR(location_list, '-', ' ');
 
-        return;
+        return 0;
 
 }
 /* --------------------------------------------------------------------- */
@@ -471,7 +471,7 @@ int free_stn_nodes()
 	stn_listhead = NULL;
 	stn_listtail = NULL;
 
-	return;
+	return 0;
 }
 
 /* ------------------------------------------------------------------------- */
@@ -482,7 +482,7 @@ struct stn_tspan *node;
 {
 	if (node == NULL)
 	{
-		return;
+		return -1;
 	}
 	else
 	{
@@ -499,7 +499,7 @@ struct stn_tspan *node;
 
 	}
 
-	return;
+	return 0;
 
 
 }
@@ -511,7 +511,7 @@ struct twindow *ts_node;
 {
         if (ts_node == NULL)
         {
-                return;
+                return -1;
         }
         else
         {   
@@ -522,7 +522,7 @@ struct twindow *ts_node;
 		ts_node = NULL;
         }
 
-        return;
+        return 0;
 
 
 }
@@ -607,7 +607,7 @@ int yyyy;
 	if (mon == 13)	
 	{
 		fprintf(stderr, "Bad day number!\n");
-		return;
+		return NULL;
 	}
 
 

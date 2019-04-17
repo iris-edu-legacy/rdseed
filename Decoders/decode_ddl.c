@@ -197,7 +197,7 @@ struct prim_struct *prim;
 	return(in);
 }
 	
-d_D(prim)
+void d_D(prim)
 struct prim_struct *prim;
 {
 	int i,j, k;
@@ -277,7 +277,7 @@ struct prim_struct *prim;
 /*	discard = FALSE; */
 }
  
-d_C(prim)
+void d_C(prim)
 struct prim_struct *prim;
 {
 	int i;
@@ -307,7 +307,7 @@ struct prim_struct *prim;
 /*	discard = FALSE; */
 }
  
-d_S1(prim)
+void d_S1(prim)
 struct prim_struct *prim;
 {
 	int i;
@@ -321,7 +321,7 @@ struct prim_struct *prim;
 /*	discard = FALSE; */
 }
  
-d_S2(prim)
+void d_S2(prim)
 struct prim_struct *prim;
 {
 	int i,j,k,l;
@@ -361,7 +361,7 @@ struct prim_struct *prim;
 		}
 }
  
-d_A(prim)
+void d_A(prim)
 struct prim_struct *prim;
 {
 	int i;
@@ -372,28 +372,28 @@ struct prim_struct *prim;
 /*	discard = FALSE; */
 }
  
-d_O(prim)
+void d_O(prim)
 struct prim_struct *prim;
 {
 	copy_order = prim->data.bit_order.type;
 /*	discard = FALSE; */
 }
  
-d_J(prim)
+void d_J(prim)
 struct prim_struct *prim;
 {
 	copy_bit = prim->data.bit_direction.bit;
 /*	discard = FALSE; */
 }
  
-d_M(prim)
+void d_M(prim)
 struct prim_struct *prim;
 {
 	mult_chan = prim->data.multiplexed.code;
 /*	discard = FALSE; */
 }
  
-d_I(prim)
+void d_I(prim)
 struct prim_struct *prim;
 {
 	inter_flag = prim->data.interleave.flag;
@@ -401,7 +401,7 @@ struct prim_struct *prim;
 /*	discard = FALSE; */
 }
  
-d_F(prim)
+void d_F(prim)
 struct prim_struct *prim;
 {
 	forward_type = prim->data.forward_constant.type;
@@ -414,7 +414,7 @@ struct prim_struct *prim;
 		}
 }
  
-d_R(prim)
+void d_R(prim)
 struct prim_struct *prim;
 {
 	reverse_type = prim->data.reverse_constant.type;
@@ -427,7 +427,7 @@ struct prim_struct *prim;
 		}
 }
  
-d_P(prim)
+void d_P(prim)
 struct prim_struct *prim;
 {
 	int i,j,num_bytes;
@@ -450,7 +450,7 @@ struct prim_struct *prim;
 	return;
 }
 
-d_E(prim)
+void d_E(prim)
 struct prim_struct *prim;
 {
 /* calculate sample from mantissa and exponent */
@@ -462,7 +462,7 @@ struct prim_struct *prim;
 	return;
 }
 
-d_Z(prim)
+void d_Z(prim)
 struct prim_struct *prim;
 {
 	if ((exponent == prim->data.zero_code.exponent) &&
@@ -473,7 +473,7 @@ struct prim_struct *prim;
 	return;
 }
 
-d_H(prim)
+void d_H(prim)
 struct prim_struct *prim;
 {
 	extract_float += (double) hidden_mantissa * extract_exponent;
@@ -783,7 +783,7 @@ struct type30 *type30;
 		{
 		case 0:		/* Integer Family */
 			{
-			decode_int(type30->decoder_key_prim[0]);
+                          decode_int((struct prim_struct *)type30->decoder_key_prim[0]);
 
 			if (mult_chan > 1) data_hdr->num_mux_chan = mult_chan;
 			else data_hdr->num_mux_chan = 1;
@@ -795,7 +795,7 @@ struct type30 *type30;
 				     j < data_hdr->num_mux_chan;
 				     j++, demux += seis_buffer_length/data_hdr->num_mux_chan)
 					{
-					decode_key_int(type30->decoder_key_prim[1]);
+					decode_key_int((struct prim_struct *)type30->decoder_key_prim[1]);
 					seismic_data_ptr -= 1;
 					}
 				extract_samples++;
@@ -806,7 +806,7 @@ struct type30 *type30;
 			}
 		case 1:		/* Gain Ranged Family */
 			{
-			decode_int(type30->decoder_key_prim[0]);
+			decode_int((struct prim_struct *)type30->decoder_key_prim[0]);
  
 			if (mult_chan > 1) data_hdr->num_mux_chan = mult_chan;
 			else data_hdr->num_mux_chan = 1;
@@ -818,11 +818,11 @@ struct type30 *type30;
 				     j < data_hdr->num_mux_chan;
 				     j++, demux += seis_buffer_length/data_hdr->num_mux_chan)
 					{
-					decode_int(type30->decoder_key_prim[1]);
+					decode_int((struct prim_struct *)type30->decoder_key_prim[1]);
 					mantissa = (int) extract_accum;
-					decode_int(type30->decoder_key_prim[2]);
+					decode_int((struct prim_struct *)type30->decoder_key_prim[2]);
 					exponent = (int) extract_accum;
-					decode_key_float(type30->decoder_key_prim[3]); 
+					decode_key_float((struct prim_struct *)type30->decoder_key_prim[3]); 
 					seismic_data_ptr -= 1;
 					}
 				extract_samples++;
@@ -832,14 +832,14 @@ struct type30 *type30;
 			}
 		case 50:		/* Compression Family */
 			{
-			decode_key_cmp1(type30->decoder_key_prim[0]);
+			decode_key_cmp1((struct prim_struct *)type30->decoder_key_prim[0]);
  
 			P_flag = FALSE;
 			extract_samples = 0;
 			while (extract_samples < nsamples)
 				{
 				compress_count = 0;
-				decode_key_cmp2(type30->decoder_key_prim[1]);
+				decode_key_cmp2((struct prim_struct *)type30->decoder_key_prim[1]);
 				decode_key_cmp4(type30, nsamples);
 				}
 			break;

@@ -200,7 +200,7 @@ struct type62 *type62_head;
 			fprintf (fp,"  i, coefficient, error\n");
 
 			for (i = 0; i < type62->number_coefficients; i++)
-				fprintf(fp,"3d % E % E\n",
+				fprintf(fp,"%3d % E % E\n",
 				i, 
 				type62->coefficient[i].coefficient,
 				type62->coefficient[i].error);

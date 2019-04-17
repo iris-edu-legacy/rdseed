@@ -281,7 +281,7 @@ FILE *fptr;
 				input_data_hdr->channel, input_data_hdr->network);
 
 		fprintf(stderr, "Skipping data record.\n");
-		return;
+		return 0;
 
 	}
 

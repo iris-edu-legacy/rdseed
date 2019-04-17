@@ -389,11 +389,9 @@ int flag = 0;
         	if (current_station == NULL) /* station was not found */
         	{
                 	fprintf (stderr, "WARNING (process_data):  ");
-                	fprintf (stderr, "station %s ",
-                        this_station);
- 						timeprt(this_time);
-                	fprintf (stderr, " - response effective time not found.\n",
-                        this_station);
+                	fprintf (stderr, "station %s ", this_station);
+                        timeprt(this_time);
+                	fprintf (stderr, " - response effective time not found.\n");
         	       	fprintf (stderr, "\tData Record Skipped.\n");
 			return;
         	}
@@ -402,9 +400,8 @@ int flag = 0;
                 {
                         fprintf (stderr, "WARNING (process_data):  ");
                         fprintf (stderr, "%s,%s ", this_station, this_channel);
-						timeprt(this_time);
-                        fprintf (stderr, " - response effective time not found.\n",
-                                this_station);
+                        timeprt(this_time);
+                        fprintf (stderr, " - response effective time not found.\n");
                         fprintf (stderr, "\tData Record Skipped.\n");
 			return;
                 }
@@ -536,7 +533,7 @@ int flag = 0;
 				newtime.second, newtime.fracsec);
 
 			fprintf (outputfile,"%11.7f ", sample_rate);
-			fprintf (outputfile,"%6d", total_samples);
+			fprintf (outputfile,"%6ld", total_samples);
 			fprintf (outputfile,"\n");
 
 			sample_rate_accum = 0.0;

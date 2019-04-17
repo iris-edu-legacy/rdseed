@@ -55,4 +55,5 @@ struct time time;
 	/* print fractional second */
 	printf("%04d",time.fracsec);
 
+        return 0;
 }

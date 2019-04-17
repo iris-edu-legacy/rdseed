@@ -60,10 +60,10 @@ int atc_add(char *atc_line)
 	int i, n;
 
 	if (atc_line == (char *) NULL)
-		return;
+		return -1;
 
 	if (strlen(atc_line) == 0)
-		return;
+		return -1;
 
 	atc = (struct atc_list *)malloc(sizeof(struct atc_list));
 
@@ -431,7 +431,7 @@ int extract_atc_lines(char *ptr)
 
 	fuse(&parts, n);
 
-	return;
+	return 0;
 
 	
 }

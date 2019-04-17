@@ -390,7 +390,7 @@ void convert_seedhdr ();		/* parse fixed size data hdr */
 void decode_asro ();			/* decode asro data */
 void decode_cdsn ();			/* decode cdsn data */
 void decode_dwwssn ();			/* decode dwwssn data */
-void decode_steim ();			/* decode steim data */
+int decode_steim ();			/* decode steim data */
 void decode_sro ();			/* decode sro data */
 void decode_32bit ();			/* decode 32-bit int data */
 void output_data (); 			/* write output data */

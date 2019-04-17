@@ -51,6 +51,9 @@
 #include "version.h"
 #include "resp_defs.h"
 
+void print_resp ();
+void print_old_resp ();
+
 void output_resp ()
 {
 	char buffer[30];	/* output file name */
@@ -83,7 +86,7 @@ void output_resp ()
 }
 	
 /*===========================================================================*/
-print_resp ()
+void print_resp ()
 {
 	FILE *outfile;			/* output file pointer */
 	char outfile_name[100];		/* output file name */
@@ -387,7 +390,7 @@ void output_old_resp ()
 }
 	
 /*===========================================================================*/
-print_old_resp ()
+void print_old_resp ()
 {
 	FILE *outfile;								/* output file pointer */
 	char outfile_name[100];	  				/* output file name */

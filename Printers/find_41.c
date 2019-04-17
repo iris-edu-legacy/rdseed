@@ -31,7 +31,7 @@
 #include "rdseed.h"
 #include "resp_defs.h"
 
-find_type41(fp, code)
+int find_type41(fp, code)
 FILE *fp;
 int code;
 {
@@ -86,7 +86,7 @@ int code;
 	if (type41 == NULL) return(0); else return(1);
 }
 
-old_find_type41(fp, code)
+int old_find_type41(fp, code)
 FILE *fp;
 int code;
 {

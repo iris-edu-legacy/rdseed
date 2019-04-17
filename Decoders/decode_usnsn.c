@@ -3,11 +3,16 @@
 
 static int cnt = 0;
 
+void dcmper(int ierr);
+void unpacknsn (int, int*, int*, int*, int*, int[], int[]);
+void gnible(char[], int[], int*, int,int,int,int);
+void dcmpbr();
+
+
 /* static cnter = 0;*/
 void decode_usnsn(data_ptr, data_hdr)
 int *data_ptr;
 struct input_data_hdr *data_hdr;
-
 
 {
 
@@ -150,7 +155,7 @@ int idat[],icmp[];
    }
 }
 
-unpacknsn(maxx,n,idat,fin,ovr,eod,icmp)
+void unpacknsn(maxx,n,idat,fin,ovr,eod,icmp)
 /*
    Subroutine unpacknsn unpacks data out of compression frame ifr into 
    array idat[max].  On return, idat will contain n+1 decompressed data 
@@ -290,7 +295,7 @@ if (idat[j] == 0)
 }
 
 
-gnible(ib,ia,ns,nb,n,nrun,sgn)
+void gnible(ib,ia,ns,nb,n,nrun,sgn)
 /*
    Gnible gets n consecutive nibbles of length nb bits from byte array 
    ib beginning at byte ib[ns] and puts them into integer*4 array ia[].  
@@ -443,7 +448,7 @@ cnter++;
 }
 
 
-dcmpbr()
+void dcmpbr()
 /*
    Dcmpbr toggles the print flag controlling Dcmprs diagnostic output.
 */
@@ -453,7 +458,7 @@ dcmpbr()
    return;
 }
 
-dcmper(ierr)
+void dcmper(ierr)
 /*
    Dcmper prints out a Dcmprs diagnostic based on the status flag returned 
    by Dcmprs.

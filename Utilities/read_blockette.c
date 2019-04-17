@@ -154,7 +154,7 @@ int *blockette_length;
 			fprintf (stderr, "ERROR (read_blockette):  ");
 			fprintf (stderr, "unable to read a complete blockette.\n");
 			fprintf (stderr, "\tLength wanted, %d; length acquired, %d\n",
-						original_blockette_length, strlen (blockette));
+                                 original_blockette_length, (int)strlen (blockette));
 			fprintf (stderr, "\tExecution terminating.\n");
 			exit (-1);
 		}

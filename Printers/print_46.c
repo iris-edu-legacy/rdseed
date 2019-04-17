@@ -51,17 +51,17 @@ void print_type46 ()
 		for (type46 = type46_head; type46 != NULL; type46 = type46->next)
 		{
 			fprintf(outputfile,"Response Lookup Code:                  %d\n",
-					blkt_id,fld_pref,3,type46->response_code);
+					type46->response_code);
 			fprintf(outputfile,"Response name:                         %s\n",
-					blkt_id,fld_pref,4,type46->name ? type46->name : "(null)");
+                                        (type46->name) ? type46->name : "(null)");
 			fprintf(outputfile,"Response in units lookup:  %4d        ",
-					blkt_id,fld_pref,5,type46->input_units_code);
+					type46->input_units_code);
 			find_type34(outputfile, type46->input_units_code);
 			fprintf(outputfile,"Response out units lookup: %4d        ",
-					blkt_id,fld_pref,6,type46->output_units_code);
+					type46->output_units_code);
 			find_type34(outputfile, type46->output_units_code);
 			fprintf(outputfile,"Number of corners:                     %d\n",
-					blkt_id,fld_pref,7,type46->number_corners);
+					type46->number_corners);
 			fprintf(outputfile,"%sCorners:\n",com_strt);
 			fprintf(outputfile,"%s  i, frequency,    slope\n",com_strt);
 			for (i = 0; i < type46->number_corners; i++)

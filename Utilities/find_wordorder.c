@@ -56,11 +56,8 @@ struct data_blk_1000 *mini_hdr;
 	{
 		unsigned char character[2];
 		unsigned short int integer;
-	} test2; */	/* holds test 2-byte w
+	} test2; */
 
-
-
-	char wordorder[4+1];			/* string for word order */
 
 	/* Construct a 4-byte word of known contents - 0x76543210 */
 	test4.character[0] = 0x76;
@@ -114,14 +111,15 @@ struct data_blk_1000 *mini_hdr;
 	if (test4.integer == MSB_LAST)
       	{
 
-		if (mini_hdr) 
+		if (mini_hdr)
+                {
 			/* 1 == miniseed in SPARC word order */
                         if (mini_hdr->word_order == 1) 
 				/* byteswapping needed */
                                 return TRUE; 
                         else  
                                 return FALSE; 
-
+                }
       		if (current_station->word_order == 1) 
 			return (FALSE);
 

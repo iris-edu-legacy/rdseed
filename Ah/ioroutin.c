@@ -483,7 +483,7 @@ char	*mkdatspace(head)
 
 
 
-get_null_head(hed)
+int get_null_head(hed)
 ahhed	*hed;
 {
 	int	i;
@@ -532,20 +532,20 @@ ahhed	*hed;
 	for(i=0; i< NEXTRAS; ++i)
 		hed->extra[i]= 0.0;
 
-	return;
+	return 0;
 }
 
 /* acpy(from,to,nbytes) copies nbytes from the array "from" to the
  *	array "to".
  */
-acpy(from,to,nbytes)
+int acpy(from,to,nbytes)
 char	*from;
 char	*to;
 unsigned	nbytes;
 {
 	while(nbytes--)
 		*from++ = *to++;
-	return;
+	return 0;
 }
 
 /*

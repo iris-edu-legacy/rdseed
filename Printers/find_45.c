@@ -69,7 +69,7 @@ int code;
 					 com_strt);
 
 			for (i = 0; i < type45->number_responses; i++)
-				fprintf (fp,"%s%s%2.2d-%2.2d  %3d % E % E    % E % E\n",
+				fprintf (fp,"%s%s%2.2d-%2.2d  %3d  % E    % E % E    % E % E\n",
 						 blkt_id,fld_pref,8,12,i,
 						 type45->response[i].frequency, 
 						 type45->response[i].amplitude,

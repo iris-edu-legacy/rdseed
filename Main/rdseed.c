@@ -301,6 +301,7 @@ char Rdseed_Cwd[MAXPATHLEN];
 char output_dir[MAXPATHLEN];
 
 void usage ();			/* fcn to show usage */
+void option_prompt();
 
 /* --------------------------------   Main   ------------------------------ */
 
@@ -1289,7 +1290,7 @@ FILE *inputfile;
 			fprintf(stderr, "Unable to scan blockette 70s!\n");
 			perror("process_B70s");
 
-			return;
+			return -1;
 
 		}
 
@@ -1314,7 +1315,7 @@ FILE *inputfile;
  
 				perror("process_B70s");
 
-                                return;
+                                return -1;
  
                         }
 
@@ -1322,7 +1323,7 @@ FILE *inputfile;
 			lrecord_ptr = precord;
 
 			if (skip_to_T(inputfile) == 0)
-                        	return;
+                        	return -1;
 
 		}
 
@@ -1350,7 +1351,7 @@ FILE *inputfile;
 							1, PRECL, 
 							inputfile);
                 		if (num_bytes_read < 0)
-                        		return;
+                        		return -1;
 
 				offset = 0;
 				lrecord_ptr = precord;
@@ -1637,13 +1638,13 @@ struct type11 *t11;
 			lrecord_ptr -= LRECL;
 			offset -= LRECL;
 
-			return;	/* bale */
+			return -1;	/* bale */
 		}
 		else
 		{
 			if (process_stnh() == 0)
 				/* took a look and the station isn't wanted */
-				return;
+				return -1;
 
 		}
 
@@ -1654,7 +1655,7 @@ struct type11 *t11;
 			/* if current logical record is <= the next stations, we are done */
 			if (input.recordnumber >= t11->station[which_station+1].sequence_number - 1)
 			{
-				return;	/* finished with this station */
+				return 0;	/* finished with this station */
 			}
 
 		/* if a blockette happens to exactly match the end of LRECL 
@@ -1684,7 +1685,7 @@ struct type11 *t11;
 
 	}		/* while not finished */
 
-	return;
+	return 0;
 
 }
 
@@ -1910,7 +1911,7 @@ char *arg;
 /* SEED reader    |         option_prompt             |    subprocedure */
 /*======================================================================*/
 /* read interactive user input */
-option_prompt()
+void option_prompt()
 {
 	char buffer[120], *p, *p2;
 	int i, comments_flag;

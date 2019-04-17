@@ -1942,7 +1942,7 @@ int printBlks(char *input_data_ptr)
 
 
         if (input_data_hdr->bofb == 0)
-                return;
+                return 0;
 
         blk_100 = (struct data_blk_100 *)(input_data_ptr +
                                         (input_data_hdr->bofb - 8));
@@ -1952,7 +1952,7 @@ int printBlks(char *input_data_ptr)
 		printf("type=%d, next=%d\n", blk_100->hdr.type, blk_100->hdr.next_blk_byte);
 
                 if (blk_100->hdr.next_blk_byte == 0)
-              		return;
+              		return 0;
 
 		/* move to next blk */
 
@@ -1961,6 +1961,7 @@ int printBlks(char *input_data_ptr)
 
         } while (1);
 
+        return 0;
 }
 
 /* ------------------------------------------------------------------ */

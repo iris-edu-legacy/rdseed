@@ -1246,7 +1246,7 @@ int write_out_PnZs(struct time start, struct time end)
 	
 		fprintf(stderr, "Skipping\n");
 
-		return;
+		return -1;
 
 	}
 
@@ -1680,7 +1680,7 @@ int write_out_PnZs(struct time start, struct time end)
  
                	fclose(fptr);
 
-               	return;
+               	return -1;
  
        	}
 
@@ -1759,7 +1759,7 @@ FILE *fptr;
 
 			}
 
-	return;
+	return 0;
 
 }
  

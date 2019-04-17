@@ -80,7 +80,7 @@ void print_type44()
 				fprintf(outputfile,"%sDenominator coefficients:\n",com_strt);
 				fprintf(outputfile,"%s  i, coefficient,  error\n",com_strt);
 				for (i = 0; i < type44->number_denominators; i++)
-					fprintf(outputfile,"%%s%s%2.2d-%2.2d  3d % E % E\n",
+					fprintf(outputfile,"%s%s%2.2d-%2.2d  %3d % E % E\n",
 							blkt_id,fld_pref,12,13,i, 
 							type44->denominator[i].coefficient,
 							type44->denominator[i].error);

@@ -314,7 +314,7 @@ int yyyy;
         if (mon == 13)
         {
                 fprintf(stderr, "Bad day number!\n");
-                return;
+                return NULL;
         }
  
  

@@ -61,7 +61,7 @@ float samplesPerSec;
 	float secsPerSample;
 
 	if (samplesPerSec == 0)
-		return;
+		return 0;
 
 	/* check year */
 
