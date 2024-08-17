@@ -1,6 +1,12 @@
 # rdseed
 rdseed – Read an FDSN SEED format volume
 
+### Install the following libraries
+
+```bash
+apt install make g++ libnsl-dev libntirpc-dev
+```
+
 ### NAME
 
 rdseed - Read an FDSN SEED format volume

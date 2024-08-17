@@ -1,3 +1,6 @@
+#ifndef HEADER_DDL
+#define HEADER_DDL
+
 struct ext_byte
 {
 	int num_bytes;
@@ -157,5 +160,4 @@ struct prim_struct
 	struct prim_struct *next;
 };
  
-struct prim_struct *key[50];
- 
+#endif //HEADER_DDL

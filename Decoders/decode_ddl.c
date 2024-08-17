@@ -26,7 +26,7 @@
 
 #include "rdseed.h"
 #include "ddl.h"
- 
+
 static char *blk_data_ptr;
 static char *cur_data_ptr;
 static union

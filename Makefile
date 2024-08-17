@@ -33,16 +33,16 @@ CC = cc
 #CFLAGS = -O -m64 -g -mmacosx-version-min=10.4
 
 #else
-CFLAGS = -O -m64 -g
+CFLAGS = -O -m64 -g -Wno-incompatible-pointer-types -Wno-implicit-int -Wno-implicit-function-declaration
 
-INCLUDE    = -I../Include
+INCLUDE    = -I../Include -I/usr/include/ntirpc/
 
 CFLAGSLINE = "$(INCLUDE) $(CFLAGS)"
 
 # comment out one or the other of the LDFLAGS
 
 # Default LDFLAGS should be good for Linux, Mac OSX, PC etc.
-LDFLAGS = -lm -lc
+LDFLAGS = -lm -lc -ltirpc
 
 # Uncomment this line for Solaris
 #LDFLAGS = -lm -lc -lnsl
